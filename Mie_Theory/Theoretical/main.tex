@@ -4,14 +4,18 @@
 \usepackage[backend=bibtex,style=numeric]{biblatex}
 \usepackage{amsmath,amsthm,amssymb,amsfonts}
 \usepackage{bm}
-
+\usepackage{graphicx}
 \usepackage{geometry}
+
 \geometry{margin=1.5cm, vmargin={0pt,1cm}}
 \setlength{\topmargin}{-1cm}
 \setlength{\paperheight}{29.7cm}
 \setlength{\textheight}{25.3cm}
 
 \addbibresource{citation.bib}
+
+\newcommand{\Rmnum}[1]{\uppercase\expandafter{\romannumeral #1}}  
+\newcommand{\rmnum}[1]{\romannumeral #1}
 
 \begin{document}
 % =================================================
@@ -23,7 +27,6 @@
 \date{更新时间: \today}
 
 \maketitle
-
 
 % ============================================
 \section{经典理论\cite{bohren2008absorption}}
@@ -79,7 +82,7 @@ $\psi$ 是一个标量函数。显然 $\bm{M}$ 和 $\bm{N}$ 是无散的，并�
 \par 利用分离变量法，设 $\psi(r,\theta,\phi)=R(r)\Theta(\theta)\Phi(\phi)$ 代入可得
 \begin{gather}
     \label{eq:azimuthal}
-    \frac{\text{d}^2 \Phi}{\text{d} \phi^2}+m\phi^2=0\\
+    \frac{\text{d}^2 \Phi}{\text{d} \phi^2}+m^2\phi^2=0\\
     \label{eq:legendre}
     \frac{1}{\sin\theta}\frac{\text{d}}{\text{d}\theta}
     \left(\sin\theta\frac{\text{d}\Theta}{\text{d}\theta}\right)
@@ -341,24 +344,178 @@ $h_n^{(2)}(kr)$ 则表现为向内辐射的球面波，因此只能选取 $h_n^{
 \end{gather}
 \par 通过具体计算，可以得到四个方程：
 \begin{gather}
-j_n(r x) c_n + h_n^{(1)}(x) b_n = j_n(x)\\
-\mu \left[ r x j_n(r x) \right]' c_n + \mu_1 \left[ x h_n^{(1)}(x) \right]' c_n = \mu_1 \left[ x j_n(x) \right]'\\
-\mu r j_n(r x) d_n + \mu_1 h_n^{(1)}(x) a_n = \mu_1 j_n(x)\\
-\left[ r x j_n(r x) \right]' d_n + r \left[ x h_n^{(1)}(x) \right]' a_n = r \left[ x j_n(x) \right]'
+j_n(\beta x) c_n + h_n^{(1)}(x) b_n = j_n(x)\\
+\mu \left[ \beta x j_n(\beta x) \right]' c_n + \mu_1 \left[ x h_n^{(1)}(x) \right]' c_n = \mu_1 \left[ x j_n(x) \right]'\\
+\mu \beta j_n(\beta x) d_n + \mu_1 h_n^{(1)}(x) a_n = \mu_1 j_n(x)\\
+\left[ \beta x j_n(\beta x) \right]' d_n + \beta \left[ x h_n^{(1)}(x) \right]' a_n = \beta \left[ x j_n(x) \right]'
 \end{gather}
-\par 其中 $x=ka$，$r=\dfrac{k_1}{k}$。利用线性代数的知识可以解出系数：
+\par 其中 $x=ka$，$\beta=\dfrac{k_1}{k}$。利用线性代数的知识可以解出系数：
 \begin{gather}
-    a_n = \frac{\mu r^2j_n(r x) \left[ x j_n(x) \right]' - \mu_1 j_n(x) \left[ r x j_n(r x) \right]'}
-    {\mu r^2j_n(r x) \left[ x h_n^{(1)}(x) \right]' - \mu_1 h_n^{(1)}(x) \left[ r x j_n(r x) \right]'}\\
-    b_n = \frac{\mu_1 j_n(r x) \left[ x j_n(x) \right]' - \mu j_n(x) \left[ r x j_n(r x) \right]'}
-    {\mu_1 j_n(r x) \left[ x h_n^{(1)}(x) \right]' - \mu h_n^{(1)}(x) \left[ r x j_n(r x) \right]'}\\
+    a_n = \frac{\mu \beta^2 j_n(\beta x) \left[ x j_n(x) \right]' - \mu_1 j_n(x) \left[ \beta x j_n(\beta x) \right]'}
+    {\mu \beta^2j_n(\beta x) \left[ x h_n^{(1)}(x) \right]' - \mu_1 h_n^{(1)}(x) \left[ \beta x j_n(\beta x) \right]'}\\
+    b_n = \frac{\mu_1 j_n(\beta x) \left[ x j_n(x) \right]' - \mu j_n(x) \left[ \beta x j_n(\beta x) \right]'}
+    {\mu_1 j_n(\beta x) \left[ x h_n^{(1)}(x) \right]' - \mu h_n^{(1)}(x) \left[ \beta x j_n(\beta x) \right]'}\\
     c_n = \frac{\mu_1 j_n(x) \left[ x h_n^{(1)}(x) \right]' - \mu_1 h_n^{(1)}(x)\left[ x j_n(x) \right]' j_n(x)}
-    {\mu_1 j_n(rx) \left[ x h_n^{(1)}(x) \right]' - \mu h_n^{(1)}(x) \left[ rx j_n(rx) \right]'}\\
-    d_n = \frac{\mu_1 r j_n(rx)\left[ x h_n^{(1)}(x) \right]' j_n(x) - \mu_1 h_n^{(1)}(x) \left[ x j_n(x) \right]'}
-    {\mu r^2j_n(r x) \left[ x h_n^{(1)}(x) \right]' - \mu_1 h_n^{(1)}(x) \left[ r x j_n(r x) \right]'}
+    {\mu_1 j_n(\beta x) \left[ x h_n^{(1)}(x) \right]' - \mu h_n^{(1)}(x) \left[ \beta x j_n(\beta x) \right]'}\\
+    d_n = \frac{\mu_1 \beta j_n(\beta x)\left[ x h_n^{(1)}(x) \right]' j_n(x) - \mu_1 h_n^{(1)}(x) \left[ x j_n(x) \right]'}
+    {\mu \beta^2j_n(\beta x) \left[ x h_n^{(1)}(x) \right]' - \mu_1 h_n^{(1)}(x) \left[ \beta x j_n(\beta x) \right]'}
 \end{gather}
 
 \subsection{柱坐标系}
+
+\subsubsection{生成函数}
+\par 在柱坐标系下 $\psi$ 的波方程可以具体写为
+\begin{equation}
+    \frac{1}{r}\frac{\partial}{\partial r}
+    \left(r\frac{\partial \psi}{\partial r}\right)
+    +\frac{1}{r^2}\frac{\partial^2 \psi}{\partial \phi^2}
+    +\frac{\partial^2 \psi}{\partial z^2}
+    +k^2\psi = 0
+\end{equation}
+\par 利用分离变量法，设 $\psi(r,\phi,z)=R(r)\Phi(\phi)Z(z)$ 代入可得
+\begin{gather}
+    \frac{\text{d}^2 \Phi}{\text{d} \phi^2}+n^2\phi^2=0\\
+    \frac{\text{d}^2 Z}{\text{d} \phi^2}+h^2Z^2=0\\
+    r\frac{\text{d}}{\text{d}r}\left(r\frac{\text{d}R}{\text{d}r}\right)
+    +\left[(k^2-h^2)r^2-n^2\right]R=0
+\end{gather}
+\par 不难得到生成函数为
+\begin{equation}
+    \psi_{n}(r,\phi,z)=
+    Z_n(\rho)e^{in\phi}e^{ihz}
+\end{equation}
+\par 其中 $\rho=\sqrt{k^2-h^2}r$，$Z_n$，$Z_n$ 是贝塞尔方程的解 $J_n$ 
+和 $Y_n$ 中的任意一种：
+\begin{equation}
+    \rho\frac{\text{d}}{\text{d}\rho}\left(\rho\frac{\text{d}R}{\text{d}\rho}\right)
+    +\left[\rho^2-n^2\right]R=0
+\end{equation}
+\par 取 $\bm{c}=\bm{\hat{e}_z}$ 于是可以得到矢量波方程的解：
+\begin{gather}
+    \bm{M}_{n}=\nabla\times(\bm{\hat{e}_z}\psi_n),
+    \qquad\bm{N}_{n}=\frac{\nabla\times\bm{M}_n}{k}
+\end{gather}
+\par 通过柱坐标系下的旋度算子，可以计算得到具体形式：
+\begin{equation}
+    \bm{M}_n =
+    \sqrt{k^2-h^2}\left(
+        in\frac{Z_n(\rho)}{r} \bm{\hat{e}_r}
+        -\frac{\text{d}Z_n(\rho)}{\text{d}\rho} \bm{\hat{e}_\phi}
+    \right)e^{i(n\phi+hz)}
+\end{equation}
+\begin{equation}
+    \bm{N}_n =
+        \frac{\sqrt{k^2-h^2}}{k}\left(
+            ih\frac{\text{d}Z_n(\rho)}{\text{d}\rho} \bm{\hat{e}_r}
+            -hn\frac{Z_n(\rho)}{\rho} \bm{\hat{e}_\phi}
+            +\sqrt{k^2-h^2} Z_n(\rho) \bm{\hat{e}_z}
+        \right)e^{i(n\phi+hz)}
+\end{equation}
+\par 正交性这里不验证。
+
+\subsubsection{级数展开}
+
+\par 考虑半径为 $a$ 的无限长圆柱体以及
+一束入射平面波 $\bm{E}_i=\bm{E}_0 e^{ik\bm{\hat{e}_i}\cdot\bm{x}}$。
+入射方向如图 \ref{fig:PlaneWave_Cylinder} 所示，
+$\bm{\hat{e}_i}=-\sin\zeta \bm{\hat{e}_x} - \cos\zeta \bm{\hat{e}_z}$。
+下面分别讨论入射电场 $\bm{E}_0$ 平行于和垂直于 $xz$ 平面的两种情况。
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.4\textwidth]{./image/PlaneWave_Cylinder.png}
+    \caption{无限长圆柱平面波入射示意图}
+    \label{fig:PlaneWave_Cylinder}
+\end{figure}
+
+\paragraph{$\bm{E}_0$ 平行于 $xz$ 平面}
+
+\par 在这种情况下，入射电场可以写为
+\begin{equation}
+    \bm{E}_i = E_0 (-\cos\zeta \bm{\hat{e}_x} + \sin\zeta \bm{\hat{e}_z}) 
+    e^{-ik(r\sin\zeta\cos\phi + z\cos\zeta)}
+\end{equation}
+\par 显然 $h$ 必须取值为 $-k\cos\zeta$。将 $\bm{E}_i$ 进行展开：
+\begin{equation}
+    \bm{E}_i=\sum_{n=-\infty}^{\infty}
+    \left(
+        A_n \bm{M}_n^{(1)} + B_n \bm{N}_n^{(1)}
+    \right)
+\end{equation}
+\par 同样进行一系列复杂的运算后得到
+\begin{equation}
+    \bm{E}_i=\sum_{n=-\infty}^{\infty} E_n \bm{N}_n^{(1)}, 
+    \qquad \bm{H}_i=\frac{-ik}{\omega\mu}
+    \sum_{n=-\infty}^{\infty} E_n \bm{M}_n^{(1)}
+\end{equation}
+\par 其中 $E_n=E_0\dfrac{(-i)^n}{k \sin\zeta}$。
+为了满足边界条件，假设散射场和内部场的级数展开式为：
+\begin{gather}
+    \bm{E}_1 = \sum_{n=-\infty}^{\infty} E_n \left(
+        g_n\bm{M}_n^{(1)}+f_n\bm{N}_n^{(1)}
+    \right)\\
+    \bm{H}_1 = \frac{-ik_1}{\omega\mu_1}
+        \sum_{n=-\infty}^{\infty} E_n \left(
+        g_n\bm{N}_n^{(1)}+f_n\bm{M}_n^{(1)}
+    \right)
+\end{gather}
+\par 其中 $k_1$ 和 $\mu_1$ 是圆柱体内部的波数和磁导率。生成函数为
+$J_n(kr\sqrt{\beta^2-\cos^2\zeta})e^{in\phi}e^{-ikz\cos\zeta}$，$\beta$ 
+为球内外波数的比值 $\dfrac{k_1}{k}$。
+\begin{gather}
+    \bm{E}_s = -\sum_{n=-\infty}^{\infty} E_n \left(
+        b_{n,\text{\Rmnum{1}}}\bm{N}_n^{(3)}+ia_{n,\text{\Rmnum{1}}}\bm{M}_n^{(3)}
+    \right)\\
+    \bm{H}_s = \frac{ik}{\mu}\sum_{n=-\infty}^{\infty} E_n \left(
+        b_{n,\text{\Rmnum{1}}}\bm{M}_n^{(3)}+ia_{n,\text{\Rmnum{1}}}\bm{N}_n^{(3)}
+    \right)
+\end{gather}
+\par 其中生成函数为
+$H_n^{(1)}(kr\sin\zeta)e^{in\phi}e^{-ikz\cos\zeta}$，
+$H_n^{(1)} = J_n + iY_n$ 是第一类汉克尔函数。 
+\par 通过具体计算可以得到 $a_{n,\text{\Rmnum{1}}}$ 和 $b_{n,\text{\Rmnum{1}}}$:
+\begin{gather}
+    a_{n ,\text{\Rmnum{1}}} = \frac{C_n V_n - B_n D_n}{W_n V_n + i D_n^2}
+    \qquad b_{n ,\text{\Rmnum{1}}} = \frac{W_n B_n + i D_n C_n}{W_n V_n + i D_n^2}
+\end{gather}
+\begin{align}
+    D_n &= n \cos \zeta \ \eta J_n(\eta) H_n^{(1)}(\xi) \left( \frac{\xi^2}{\eta^2} - 1 \right) \\
+    B_n &= \xi \left[ m^2 \xi J_n'(\eta) J_n(\xi) - \eta J_n(\eta) J_n'(\xi) \right] \\
+    C_n &= n \cos \zeta \ \eta J_n(\eta) J_n(\xi) \left( \frac{\xi^2}{\eta^2} - 1 \right) \\
+    V_n &= \xi \left[ m^2 \xi J_n'(\eta) H_n^{(1)}(\xi) - \eta J_n(\eta) H_n^{(1)'}(\xi) \right] \\
+    W_n &= i \xi \left[ \eta J_n(\eta) H_n^{(1)'}(\xi) - \xi J_n'(\eta) H_n^{(1)}(\xi) \right]
+\end{align}
+\par 其中 $\xi = k a \sin \zeta$，
+$\eta = x \sqrt{\beta^2 - \cos^2 \zeta}$，
+$x=ka$。
+
+\paragraph{$\bm{E}_0$ 垂直于 $xz$ 平面}
+
+\par 在这种情况下，入射电场可以写为
+\begin{equation}
+    \bm{E}_i = E_0 \bm{\hat{e}_y} 
+    e^{-ik(r\sin\zeta\cos\phi + z\cos\zeta)}
+\end{equation}
+\par 经过计算后可得
+\begin{equation}
+    \bm{E}_i=-i\sum_{n=-\infty}^{\infty} E_n \bm{M}_n^{(1)}
+\end{equation}
+\par 假设散射场级数展开式为：
+\begin{gather}
+    \bm{E}_s = \sum_{n=-\infty}^{\infty} E_n \left(
+        ia_{n,\text{\Rmnum{2}}}\bm{M}_n^{(3)}+b_{n,\text{\Rmnum{2}}}\bm{N}_n^{(3)}
+    \right)
+\end{gather}
+\par 利用边界条件，可以得到 $a_{n,\text{\Rmnum{2}}}$ 和 $b_{n,\text{\Rmnum{2}}}$:
+\begin{gather}
+    a_{n ,\text{\Rmnum{2}}} = -\frac{A_n V_n - iC_n D_n}{W_n V_n + i D_n^2}
+    \qquad b_{n ,\text{\Rmnum{2}}} = -i\frac{C_n W_n + A_n D_n}{W_n V_n + i D_n^2}
+\end{gather}
+\par 其中 $D_n$，$C_n$，$V_n$ 以及 $W_n$ 与前面定义相同，另外
+\begin{equation}
+    A_n = i\xi \left[ 
+        \xi J_n'(\eta) J_n(\xi) - \eta J_n(\eta) J_n'(\xi) 
+    \right]
+\end{equation}
 
 % ===============================================
 
