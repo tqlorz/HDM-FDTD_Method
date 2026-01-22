@@ -34,7 +34,7 @@
 \par 先推导矢量波方程，然后在球坐标系和柱坐标系下分别求解。
 
 \subsection{矢量波方程}
-\par 假设介质是线性、各向同性和均匀的，我们要研究的方程有矢量波方程：
+\par 假设介质是线性、各向同性和均匀的，并且考虑无源的情况，我们要研究的有矢量波方程：
 \begin{gather}
     \nabla^2 \bm{E} + k^2\bm{E}=\bm{0}\\
     \nabla^2 \bm{H} + k^2\bm{H}=\bm{0}
@@ -379,12 +379,12 @@ j_n(\beta x) c_n + h_n^{(1)}(x) b_n = j_n(x)\\
     r\frac{\text{d}}{\text{d}r}\left(r\frac{\text{d}R}{\text{d}r}\right)
     +\left[(k^2-h^2)r^2-n^2\right]R=0
 \end{gather}
-\par 不难得到生成函数为
+\par 注意这里 $n$ 是整数，但 $h^2$ 可以是任意实数。不难得到生成函数为
 \begin{equation}
     \psi_{n}(r,\phi,z)=
     Z_n(\rho)e^{in\phi}e^{ihz}
 \end{equation}
-\par 其中 $\rho=\sqrt{k^2-h^2}r$，$Z_n$，$Z_n$ 是贝塞尔方程的解 $J_n$ 
+\par 其中 $\rho=\sqrt{k^2-h^2}r$，$Z_n$ 是贝塞尔方程的解 $J_n$ 
 和 $Y_n$ 中的任意一种：
 \begin{equation}
     \rho\frac{\text{d}}{\text{d}\rho}\left(\rho\frac{\text{d}R}{\text{d}\rho}\right)
@@ -399,7 +399,7 @@ j_n(\beta x) c_n + h_n^{(1)}(x) b_n = j_n(x)\\
 \begin{equation}
     \bm{M}_n =
     \sqrt{k^2-h^2}\left(
-        in\frac{Z_n(\rho)}{r} \bm{\hat{e}_r}
+        in\frac{Z_n(\rho)}{\rho} \bm{\hat{e}_r}
         -\frac{\text{d}Z_n(\rho)}{\text{d}\rho} \bm{\hat{e}_\phi}
     \right)e^{i(n\phi+hz)}
 \end{equation}
@@ -465,27 +465,123 @@ $J_n(kr\sqrt{\beta^2-\cos^2\zeta})e^{in\phi}e^{-ikz\cos\zeta}$，$\beta$
     \bm{E}_s = -\sum_{n=-\infty}^{\infty} E_n \left(
         b_{n,\text{\Rmnum{1}}}\bm{N}_n^{(3)}+ia_{n,\text{\Rmnum{1}}}\bm{M}_n^{(3)}
     \right)\\
-    \bm{H}_s = \frac{ik}{\mu}\sum_{n=-\infty}^{\infty} E_n \left(
+    \bm{H}_s = \frac{ik}{\omega\mu}\sum_{n=-\infty}^{\infty} E_n \left(
         b_{n,\text{\Rmnum{1}}}\bm{M}_n^{(3)}+ia_{n,\text{\Rmnum{1}}}\bm{N}_n^{(3)}
     \right)
 \end{gather}
 \par 其中生成函数为
 $H_n^{(1)}(kr\sin\zeta)e^{in\phi}e^{-ikz\cos\zeta}$，
 $H_n^{(1)} = J_n + iY_n$ 是第一类汉克尔函数。 
-\par 通过具体计算可以得到 $a_{n,\text{\Rmnum{1}}}$ 和 $b_{n,\text{\Rmnum{1}}}$:
+\par 在分界面处有边界条件：
+\begin{equation}
+    (\bm{E}_i+\bm{E}_s-\bm{E}_1)\times \bm{\hat{e}_r} =
+    (\bm{H}_i+\bm{H}_s-\bm{H}_1)\times \bm{\hat{e}_r} = 0
+\end{equation}
+\par 代入可得在 $r=a$ 处有以下式子成立：
+\begin{gather}
+    E_{i\phi}+E_{s\phi}=E_{1\phi},
+    \qquad E_{iz}+E_{sz}=E_{1z}\\
+    H_{i\phi}+H_{s\phi}=H_{1\phi},
+    \qquad H_{iz}+H_{sz}=H_{1z}
+\end{gather}
+\par 代入具体表达式后，可以得到四个方程：
+% \begin{gather}
+%     \frac{\xi}{x}(-hn)\frac{J_n(\xi)}{\xi}
+%     -ia_n\frac{\xi}{a}(-[H_n(\xi)]')-b_n\frac{\xi}{x}(-hn)\frac{H_n(\xi)}{\xi}
+%     =g_n\frac{\eta}{a}(-[J_n(\eta)]')+f_n\frac{\eta}{x}(-hn)\frac{J_n(\eta)}{\eta}\\
+%     \frac{\xi}{x}\frac{\xi}{a} J_n(\xi)
+%     -b_n  \frac{\xi}{x}\frac{\xi}{a} H_n(\xi)
+%     = f_n \frac{\eta}{x}\frac{\eta}{a} J_n(\eta)\\
+%     \frac{-ik}{\omega\mu}\frac{\xi}{a}(-[J_n(\xi)]')
+%     +\frac{ik}{\omega\mu}\left(b_n\frac{\xi}{a}(-[H_n(\xi)]')+ia_n\frac{\xi}{x}(-hn)\frac{H_n(\xi)}{\xi}\right)
+%     =\frac{-ik_1}{\omega\mu_1}\left(f_n\frac{\eta}{a}(-[J_n(\eta)]')+g_n\frac{\eta}{x}(-hn)\frac{J_n(\eta)}{\eta}\right)\\
+%     \frac{ik}{\omega\mu}i a_n  \frac{\xi}{x}\frac{\xi}{a} H_n(\xi)
+%     = \frac{-ik_1}{\omega\mu_1}g_n \frac{\eta}{x}\frac{\eta}{a} J_n(\eta)
+% \end{gather}
+
+\begin{gather}
+    n \cos \zeta  J_n(\xi)
+    +i\xi[H_n(\xi)]'a_n-n \cos \zeta H_n(\xi)b_n
+    =-\eta[J_n(\eta)]'g_n+n \cos \zeta J_n(\eta)f_n\\
+    \frac{\xi^2}{\eta^2} J_n(\xi)
+    - \frac{\xi^2}{\eta^2} H_n(\xi) b_n
+    = J_n(\eta)f_n\\
+    \frac{\mu_1}{\mu} \xi  [J_n(\xi)]'
+    -\frac{\mu_1}{\mu} \xi[H_n(\xi)]' b_n +i \frac{\mu_1}{\mu} n\cos \zeta  H_n(\xi)a_n
+    =\beta \eta[J_n(\eta)]'f_n -\beta n \cos \zeta  J_n(\eta)g_n\\
+    i\frac{\mu_1}{\mu}\frac{\xi^2}{\eta^2} H_n(\xi) a_n 
+    = -\beta J_n(\eta) g_n
+\end{gather}
+\par 为了简化计算，考虑$ \mu = \mu_1$的情况，并且消去 $f_n$ 和 $g_n$：
+
+% \begin{gather}
+%     n \cos \zeta  J_n(\xi)
+%     +i\xi[H_n(\xi)]'a_n-n \cos \zeta H_n(\xi)b_n
+%     =\eta[J_n(\eta)]'\frac{1}{\beta J_n(\eta)}i\frac{\xi^2}{\eta^2} H_n(\xi) a_n +n \cos \zeta \left(
+%         \frac{\xi^2}{\eta^2} J_n(\xi)
+%     - \frac{\xi^2}{\eta^2} H_n(\xi) b_n
+%     \right)\\
+%     \xi  [J_n(\xi)]'
+%     - \xi[H_n(\xi)]' b_n +i  n\cos \zeta  H_n(\xi)a_n
+%     =\beta \eta[J_n(\eta)]'\frac{1}{J_n(\eta)}\left(
+%         \frac{\xi^2}{\eta^2} J_n(\xi)
+%     - \frac{\xi^2}{\eta^2} H_n(\xi) b_n
+%     \right) + n \cos \zeta  i\frac{\xi^2}{\eta^2} H_n(\xi) a_n
+% \end{gather}
+
+% \begin{gather}
+%     \beta J_n(\eta)n \cos \zeta  J_n(\xi)
+%     +\beta J_n(\eta)i\xi[H_n(\xi)]'a_n-\beta J_n(\eta)n \cos \zeta H_n(\xi)b_n\\
+%     =\eta[J_n(\eta)]'i\frac{\xi^2}{\eta^2} H_n(\xi) a_n +\beta J_n(\eta)n \cos \zeta \left(
+%         \frac{\xi^2}{\eta^2} J_n(\xi)
+%     - \frac{\xi^2}{\eta^2} H_n(\xi) b_n
+%     \right)\\
+%     J_n(\eta)\xi  [J_n(\xi)]'
+%     - J_n(\eta)\xi[H_n(\xi)]' b_n +J_n(\eta)i  n\cos \zeta  H_n(\xi)a_n\\
+%     =\beta \eta[J_n(\eta)]'\left(
+%         \frac{\xi^2}{\eta^2} J_n(\xi)
+%     - \frac{\xi^2}{\eta^2} H_n(\xi) b_n
+%     \right) + J_n(\eta)n \cos \zeta  i\frac{\xi^2}{\eta^2} H_n(\xi) a_n
+% \end{gather}
+
+\begin{gather}
+    i\xi\left(
+        \beta \eta J_n(\eta)[H_n(\xi)]'
+    -\xi[J_n(\eta)]'H_n(\xi)
+    \right)a_n
+    +\beta n\cos \zeta \ \eta J_n(\eta)H_n(\xi)\left(
+        \frac{\xi^2}{\eta^2} - 1
+    \right) b_n\\
+    =\beta n \cos \zeta\ \eta J_n(\eta)J_n(\xi)\left(
+        \frac{\xi^2}{\eta^2} - 1
+    \right)\\
+    n\cos \zeta\ \eta J_n(\eta)H_n(\xi)\left(
+    \frac{\xi^2}{\eta^2} - 1
+    \right)a_n
+    +i\xi\left(
+        \beta\xi H_n(\xi)[J_n(\eta)]'-\eta J_n(\eta)[H_n(\xi)]'
+    \right) b_n\\ 
+    =i\xi\left(
+        \beta\xi [J_n(\eta)]'
+        J_n(\xi)
+        -\eta J_n(\eta)  [J_n(\xi)]'
+    \right)
+\end{gather}
+
+\par 解方程组后可以得到 $a_{n,\text{\Rmnum{1}}}$ 和 $b_{n,\text{\Rmnum{1}}}$:
 \begin{gather}
     a_{n ,\text{\Rmnum{1}}} = \frac{C_n V_n - B_n D_n}{W_n V_n + i D_n^2}
     \qquad b_{n ,\text{\Rmnum{1}}} = \frac{W_n B_n + i D_n C_n}{W_n V_n + i D_n^2}
 \end{gather}
 \begin{align}
     D_n &= n \cos \zeta \ \eta J_n(\eta) H_n^{(1)}(\xi) \left( \frac{\xi^2}{\eta^2} - 1 \right) \\
-    B_n &= \xi \left[ m^2 \xi J_n'(\eta) J_n(\xi) - \eta J_n(\eta) J_n'(\xi) \right] \\
+    B_n &= \xi \left[ \beta^2 \xi J_n'(\eta) J_n(\xi) - \eta J_n(\eta) J_n'(\xi) \right] \\
     C_n &= n \cos \zeta \ \eta J_n(\eta) J_n(\xi) \left( \frac{\xi^2}{\eta^2} - 1 \right) \\
-    V_n &= \xi \left[ m^2 \xi J_n'(\eta) H_n^{(1)}(\xi) - \eta J_n(\eta) H_n^{(1)'}(\xi) \right] \\
+    V_n &= \xi \left[ \beta^2 \xi J_n'(\eta) H_n^{(1)}(\xi) - \eta J_n(\eta) H_n^{(1)'}(\xi) \right] \\
     W_n &= i \xi \left[ \eta J_n(\eta) H_n^{(1)'}(\xi) - \xi J_n'(\eta) H_n^{(1)}(\xi) \right]
 \end{align}
 \par 其中 $\xi = k a \sin \zeta$，
-$\eta = x \sqrt{\beta^2 - \cos^2 \zeta}$，
+$\eta = ka \sqrt{\beta^2 - \cos^2 \zeta}$，
 $x=ka$。
 
 \paragraph{$\bm{E}_0$ 垂直于 $xz$ 平面}
@@ -516,6 +612,66 @@ $x=ka$。
         \xi J_n'(\eta) J_n(\xi) - \eta J_n(\eta) J_n'(\xi) 
     \right]
 \end{equation}
+\par 这一部分结果正确性尚未验证，因为下一节中的入射波属于这种情况，所以
+会在下一节中具体计算。
+
+\section{非局域理论\cite{ruppin_extinction_2001}}
+
+\par 这里想用 Mie 散射理论来研究金属纳米粒子的光学性质，
+具体逻辑还没理清楚，因此先把文献中的公式抄下来。
+
+\par 真空中电磁波是没有纵波的，但是在金属纳米粒子中，由于存在非局域效应，
+电磁波可以激发粒子内部的纵波。生成函数需要多添加一个纵波部分：
+\begin{gather}
+    \bm{M}_n = \nabla\times\left(
+        \bm{\hat{e}_z} Z_n(kr)e^{in\phi}e^{ihz}
+    \right)\\
+    \bm{N}_n = \frac{\nabla\times\bm{M}_n}{k}\\
+    \bm{L}_n = \nabla\left(
+        Z_n(k_L r)e^{in\phi}e^{ihz}
+    \right)
+\end{gather}
+\par 考虑入射方向沿着 $x$ 轴，电场极化方向沿着 $y$ 轴的平面波入射，此时 $h=0$。
+\begin{gather}
+    \bm{E}_i = \bm{\hat{e}_y}e^{ikr\cos\phi}
+            = \frac{i}{k} \sum_{n=-\infty}^{\infty} i^n \bm{M}_n^{(1)}(kr)\\
+    \bm{H}_i = \frac{\sqrt{\varepsilon_m}}{k} \sum_{n=-\infty}^{\infty} i^n \bm{N}_n^{(1)}(kr)
+\end{gather}
+\par 内部场级数展开式为：
+\begin{gather}
+    \bm{E}_{1,T} = \frac{i}{k_T} \sum_{n=-\infty}^{\infty} i^n g_n\bm{M}_n^{(1)}(k_T r)\\
+    \bm{H}_{1,T} = \frac{\sqrt{\varepsilon_m}}{k} \sum_{n=-\infty}^{\infty} i^n g_n\bm{N}_n^{(1)}(k_Tr)\\
+    \bm{E}_{1,L} = \frac{i}{k}\sum_{n=-\infty}^{\infty} i^n f_n \bm{L}_n(k_L r)\\
+    \bm{H}_{1,L} = 0
+\end{gather}
+\par 散射场级数展开式为：
+\begin{gather}
+    \bm{E}_s = -\frac{i}{k} \sum_{n=-\infty}^{\infty} i^n a_n \bm{M}_n^{(3)}(kr)\\
+    \bm{H}_s = \frac{\sqrt{\varepsilon_m}}{k} \sum_{n=-\infty}^{\infty} i^n a_n \bm{N}_n^{(3)}(kr)
+\end{gather}
+\par 通过边界条件可以得到方程：
+\begin{gather}
+    J_n'(ka)+a_n H_n^{(1)'}(ka) = g_n J_n'(k_T a) - \frac{in}{k a}f_n J_n(k_L a)\\
+    \sqrt{\varepsilon_m}\left[ J_n(ka) + a_n H_n^{(1)}(ka) \right]
+    = \sqrt{\varepsilon_T} g_n J_n(k_T a)
+\end{gather}
+\par 另外还需要满足额外的边界条件：
+\begin{equation}
+    \bm{\hat{e}_r} \cdot(\bm{E}_{i} + \bm{E}_{s}) = 
+    \bm{\hat{e}_r} \cdot(\bm{E}_{1,T} + \bm{E}_{1,L})
+\end{equation}
+\par 也就是：
+\begin{gather}
+    \frac{n}{k a} J_n(ka) + \frac{n}{k a} a_n H_n^{(1)}(ka)
+    = \frac{n}{k_T a} g_n J_n(k_T a) - i\frac{k_L}{k} f_n J_n'(k_L a)
+\end{gather}
+\par 通过以上式子可以解得：
+\begin{gather}
+    a_n = \frac{-j_n(ka)\left[j_n(k_T a)+\alpha_n\right]
+    +j_n(k_T a) j_n'(ka)/\sqrt{\varepsilon_m}}
+    {h_n^{(1)}(ka)\left[j_n(k_T a)+\alpha_n\right]
+    -j_n(k_T a) h_n^{(1)'}(ka)/\sqrt{\varepsilon_m}}
+\end{gather}
 
 % ===============================================
 
