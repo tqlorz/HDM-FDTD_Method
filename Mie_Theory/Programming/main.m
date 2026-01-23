@@ -28,15 +28,23 @@ k_L = sqrt((omega.^2 + 1i*gamma*omega - omega_p^2) / (0.6*v_F^2));      % Longit
 k_T = sqrt(epsilon_T) .* omega / c;                                     % Transverse wavevector inside
 k_o = sqrt(epsilon_m) * omega / c;                                      % Wavevector of the outside
 
-%% Calulate extinction cross-section
+%% Calculate scattering coefficients
 N = 20;                     % Maximum order of scattering coefficients
-C_ext = ExtinctionCrossSection(N, k_o, k_T, k_L, a, epsilon_T, epsilon_m);
+a_n_local = ScattingCoefficients_Local(N, k_o, k_T, a, epsilon_T, epsilon_m);
+a_n_nonlocal = ScattingCoefficients_Nonlocal(N, k_o, k_T, k_L, a, epsilon_T, epsilon_m);
+
+%% Calulate extinction cross-section
+C_ext_local = ExtinctionCrossSection(k_o, a, a_n_local);
+C_ext_nonlocal = ExtinctionCrossSection(k_o, a, a_n_nonlocal);
 
 %% Draw results
 figure;
 x_axis = linspace(0.4, 1.4, SamplingPoints).';
-plot(x_axis, log(C_ext), 'LineWidth', 2);
-xlabel('Frequency', 'FontSize', 14);
-ylabel('Normalized Extinction Cross-Section', 'FontSize', 14);
-title('Extinction Cross-Section vs Frequency', 'FontSize', 16);
+plot(x_axis, log(C_ext_local), 'LineWidth', 2, 'LineStyle', '--');
+hold on;
+plot(x_axis, log(C_ext_nonlocal), 'LineWidth', 2);
+legend('Local Response', 'Nonlocal Response', 'FontSize', 12);
+xlabel('$\omega/\omega_p$', 'Interpreter', 'latex', 'FontSize', 14);
+ylabel('$\log(C_{ext})$', 'Interpreter', 'latex', 'FontSize', 14);
+title(['Na cylinder of radius ' num2str(a*1e9) ' nm, in a medium with $\varepsilon_m =$ ' num2str(epsilon_m)], 'Interpreter', 'latex', 'FontSize', 16);
 grid on;
