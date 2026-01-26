@@ -30,6 +30,61 @@
 \maketitle
 
 % ============================================
+\section{消光截面\cite{bohren2008absorption}}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.4\textwidth]{./image/Extinction_SingleParticle.png}
+    \caption{单个粒子的消光示意图}
+    \label{fig:Extinction_SingleParticle}
+\end{figure}
+
+\par 在介绍 Mie 理论之前，先介绍一下消光截面的概念。 
+假设有一束平面波入射到一个散射体上，其外部电场可以表示为
+入射场与散射场的叠加：
+\begin{equation}
+    \bm{E}_2=\bm{E}_i+\bm{E}_s
+\end{equation}
+\par 其相应的Poynting矢量为
+\begin{equation}
+    \bm{S}=\frac{1}{2}\text{Re}\left\{\bm{E}_2\times\bm{H}_2^*\right\}
+    =\bm{S}_i + \bm{S}_s + \bm{S}_{\text{ext}}
+\end{equation}
+\par 其中
+\begin{gather}
+    \bm{S}_i = \frac{1}{2}\text{Re}\left\{\bm{E}_i\times\bm{H}_i^*\right\}\\
+    \bm{S}_s = \frac{1}{2}\text{Re}\left\{\bm{E}_s\times\bm{H}_s^*\right\}\\
+    \bm{S}_{\text{ext}} = \frac{1}{2}\text{Re}\left\{\bm{E}_i\times\bm{H}_s^*+\bm{E}_s\times\bm{H}_i^*\right\}
+\end{gather}
+\par 如图 \ref{fig:Extinction_SingleParticle} 所示，
+考虑一个半径为 $r$ 的假想球面 $A$ 包裹了要研究的散射体，
+则通过该球面的总能量通量可以定义为
+\begin{equation}
+    W_a = -\int_{A} \bm{S}\cdot \bm{\hat{e}_r} \text{d}A
+\end{equation}
+\par 如果假设介质不会吸收电磁波，则
+$W_a$ 表示了被散射体吸收掉的能量。自然的，
+$W_a$ 可以拆分成三项之和 $W_a = W_i-W_s+W_{\text{ext}}$：
+\begin{gather}
+    W_i = -\int_{A} \bm{S}_i\cdot \bm{\hat{e}_r} \text{d}A\\
+    W_s = \int_{A} \bm{S}_s\cdot \bm{\hat{e}_r} \text{d}A\\
+    W_{\text{ext}} = -\int_{A} \bm{S}_{\text{ext}}\cdot \bm{\hat{e}_r} \text{d}A
+\end{gather}
+\par 对于非吸收介质，$W_i$完全消失；而$W_s$是表面$A$上散射波能量的通量。
+因此，$W_{\text{ext}}$只是两项之和：
+\begin{equation}
+    W_{\text{ext}} = W_a + W_s
+\end{equation}
+\par 消光截面定义为
+\begin{equation}
+    C_{\text{ext}} = \frac{W_{\text{ext}}}{I_i}
+\end{equation}
+\par 其中 $I_i$ 是入射波的辐照度，即单位面积上的入射波功率。
+类似地，可以定义散射截面和吸收截面，并且有
+\begin{equation}
+    C_{\text{ext}} = C_a + C_s
+\end{equation}
+
 \section{经典理论\cite{bohren2008absorption}}
 
 \par 先推导矢量波方程，然后在球坐标系和柱坐标系下分别求解。
@@ -417,6 +472,35 @@ j_n(\beta x) c_n + h_n^{(1)}(x) b_n = j_n(x)\\
     {\mu \beta^2j_n(\beta x) \left[ x h_n^{(1)}(x) \right]' - \mu_1 h_n^{(1)}(x) \left[ \beta x j_n(\beta x) \right]'}
 \end{gather}
 
+\subsubsection{散射截面计算}
+
+\par 同样考虑非吸收的介质，我们可以精确地计算散射截面和消光截面：
+\begin{align}
+    W_{\text{ext}} &= \frac{1}{2} \text{Re} \int_{0}^{2\pi} \int_{0}^{\pi} \left( 
+        E_{i \phi} H_{s \theta}^* - E_{i \theta} H_{s \phi}^* - E_{s \theta} H_{i \phi}^* + E_{s \phi} H_{i \theta}^* 
+        \right) r^2 \sin \theta \text{d}\theta \text{d}\phi\\
+    W_s &= \frac{1}{2} \text{Re} \int_{0}^{2\pi} \int_{0}^{\pi} \left(
+        E_{s \theta} H_{s \phi}^* - E_{s \phi} H_{s \theta}^* 
+        \right) r^2 \sin \theta \text{d}\theta \text{d}\phi 
+\end{align}
+\par 假设入射波的电场是 $x$ 方向极化的，其具体分量可以写出：
+\begin{align}
+    E_{i \theta} &= \frac{\cos \phi}{\rho} \sum_{n=1}^{\infty} E_n(\psi_n \pi_n - i \psi'_n \pi_n) \qquad H_{i \theta} = \frac{k}{\omega \mu} \tan \phi E_{i \theta}\\
+    E_{i \phi} &= \frac{\sin \phi}{\rho} \sum_{n=1}^{\infty} E_n(i \psi'_n \pi_n - \psi_n \pi_n) \qquad H_{i \phi} = \frac{-k}{\omega \mu} \cot \phi E_{i \phi}
+\end{align}
+\par 其中 $\rho=kr$，对应的散射场分量为：
+\begin{align*}
+    E_{s\theta} &= \frac{\cos\phi}{\rho} \sum_{n=1}^{\infty} E_n ( i a_n \xi'_n \tau_n - b_n \xi_n \pi_n)\\
+    E_{s\phi} &= \frac{\sin\phi}{\rho} \sum_{n=1}^{\infty} E_n ( b_n \xi_n \tau_n - i a_n \xi'_n \pi_n)\\
+    H_{s\theta} &= \frac{k}{\omega\mu} \frac{\sin\phi}{\rho} \sum_{n=1}^{\infty} E_n ( i b_n \xi'_n \tau_n - a_n \xi_n \pi_n)\\
+    H_{s\phi} &= \frac{k}{\omega\mu} \frac{\cos\phi}{\rho} \sum_{n=1}^{\infty} E_n ( i b_n \xi'_n \pi_n - a_n \xi_n \tau_n)
+\end{align*}
+\par 通过具体计算，可以得到消光截面和散射截面分别为：
+\begin{align}
+    C_s &=\frac{W_s}{I_i}= \frac{2\pi}{k^2} \sum_{n=1}^{\infty} (2n+1) (|a_n|^2 + |b_n|^2)\\
+    C_{\text{ext}} &= \frac{W_{\text{ext}}}{I_i}=\frac{2\pi}{k^2} \sum_{n=1}^{\infty} (2n+1) \text{Re}(a_n + b_n)
+\end{align}
+
 \subsection{柱坐标系}
 
 \subsubsection{生成函数}
@@ -469,7 +553,7 @@ j_n(\beta x) c_n + h_n^{(1)}(x) b_n = j_n(x)\\
 \end{equation}
 \par 正交性这里不验证。
 
-\subsubsection{级数展开}
+\subsubsection{散射场与内部场计算}
 
 \par 考虑半径为 $a$ 的无限长圆柱体以及
 一束入射平面波 $\bm{E}_i=\bm{E}_0 e^{ik\bm{\hat{e}_i}\cdot\bm{x}}$。
@@ -682,6 +766,52 @@ $x=ka$。
         \xi J_n'(\eta) J_n(\xi) - \eta J_n(\eta) J_n'(\xi) 
     \right]
 \end{equation}
+
+\subsubsection{散射截面计算}
+
+\par 同样考虑非吸收的介质，散射截面和消光截面计算公式如下：
+\begin{align}
+    W_{\text{ext}} &= RL\int_{0}^{2\pi} \left(
+        \bm{S}_{\text{ext}}
+        \right)_r \text{d}\phi \\
+    W_s &= RL\int_{0}^{2\pi} \left(
+        \bm{S}_s
+        \right)_r \text{d}\phi 
+\end{align}
+\par 其中 $R$ 为假想柱面半径，$L$ 为柱体长度。
+\paragraph{$\bm{E}_0$ 平行于 $xz$ 平面}
+\begin{gather}
+    Q_{s,\text{\Rmnum{1}}} = \frac{W_{s,\text{\Rmnum{1}}}}{2aL I_i} 
+    = \frac{2}{x} \left[
+        |b_{0,\text{\Rmnum{1}}}|^2
+        +\sum_{n=1}^{\infty} \left(
+        |b_{n,\text{\Rmnum{1}}}|^2 + |a_{n,\text{\Rmnum{1}}}|^2
+    \right)
+    \right]\\
+    Q_{\text{ext},\text{\Rmnum{1}}} = \frac{W_{\text{ext},\text{\Rmnum{1}}}}{2aLI_i} 
+    = \frac{2}{x} \text{Re}\left\{
+        b_{0,\text{\Rmnum{1}}}
+        +2\sum_{n=1}^{\infty} 
+        b_{n,\text{\Rmnum{1}}}
+    \right\}
+\end{gather}
+
+\paragraph{$\bm{E}_0$ 垂直于 $xz$ 平面}
+\begin{gather}
+    Q_{s,\text{\Rmnum{2}}}
+    = \frac{2}{x} \left[
+        |a_{0,\text{\Rmnum{2}}}|^2
+        +2\sum_{n=1}^{\infty} \left(
+        |a_{n,\text{\Rmnum{2}}}|^2 + |b_{n,\text{\Rmnum{2}}}|^2
+    \right)
+    \right]\\
+    Q_{\text{ext},\text{\Rmnum{2}}}
+    = \frac{2}{x} \text{Re}\left\{
+        a_{0,\text{\Rmnum{2}}}
+        +2\sum_{n=1}^{\infty} 
+        a_{n,\text{\Rmnum{2}}}
+    \right\}
+\end{gather}
 
 \section{非局域理论\cite{ruppin_extinction_2001}}
 
