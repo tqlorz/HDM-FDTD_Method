@@ -3,6 +3,7 @@
 \usepackage[affil-it]{authblk}
 \usepackage[backend=bibtex,style=numeric]{biblatex}
 \usepackage{amsmath,amsthm,amssymb,amsfonts}
+\usepackage{mathrsfs}
 \usepackage{bm}
 \usepackage{graphicx}
 \usepackage{geometry}
@@ -257,7 +258,7 @@ $\psi$ 是一个标量函数。显然 $\bm{M}$ 和 $\bm{N}$ 是无散的，并�
     {\int_{0}^{2\pi}\int_{0}^{\pi}|\bm{M}_{emn}|^2 \sin\theta \text{d}\theta \text{d}\phi}
 \end{equation}
 \par 注意到式 \eqref{eq:PlanarWave} 中带有 $\cos\phi$ 和 $\sin\phi$，因此
-只有当 $m=1$ 时积分不为 0。
+只有当 $m=1$ 时分子积分不为 0。
 \begin{equation}
     \bm{E}_i=\sum_{n=1}^{\infty}\left(
         B_{o1n}\bm{M}_{o1n}^{(1)}+A_{e1n}\bm{N}_{e1n}^{(1)}
@@ -265,6 +266,61 @@ $\psi$ 是一个标量函数。显然 $\bm{M}$ 和 $\bm{N}$ 是无散的，并�
 \end{equation}
 \par 这里上标 $(1)$ 表示选取球贝塞尔函数 $j_n$，这是由物理含义决定的，
 因为只有$j_n(kr)$在$r=0$处为有限值，而另外三种球函数在$r=0$处发散。
+\par 这里以 $B_{o1n}$ 为例，为了具体计算展开系数，需要先计算其分子部分：
+\begin{equation}
+    \begin{aligned}
+        \int_{0}^{2\pi}\int_{0}^{\pi}\bm{E}_i\cdot\bm{M}_{o1n}^{(1)} \sin\theta \text{d}\theta \text{d}\phi
+        &=E_0j_n(kr)\int_{0}^{2\pi}\int_{0}^{\pi}e^{ikr\cos\theta}\left[
+            \frac{\cos\theta}{\sin\theta}\cos^2\phi P_n^1(\cos\theta) 
+            +\sin^2\phi \frac{\text{d}P_n^1(\cos\theta)}{\text{d}\theta} 
+        \right] \sin\theta \text{d}\theta \text{d}\phi\\
+        &=\pi E_0j_n(kr)\int_{0}^{\pi}e^{ikr\cos\theta}\left[
+            \frac{\cos\theta}{\sin\theta}P_n^1(\cos\theta) 
+            +\frac{\text{d}P_n^1(\cos\theta)}{\text{d}\theta} 
+        \right] \sin\theta \text{d}\theta\\
+        &=\pi E_0j_n(kr)\int_{0}^{\pi}e^{ikr\cos\theta}
+            \frac{\text{d}}{\text{d}\theta} \left[
+            \sin\theta P_n^1(\cos\theta) 
+        \right] \text{d}\theta\\
+        &=-\pi E_0j_n(kr)\int_{0}^{\pi}e^{ikr\cos\theta}
+            \frac{\text{d}}{\text{d}\theta} \left[
+            \sin\theta \frac{\text{d}P_n(\cos\theta)}{\text{d}\theta}
+        \right] \text{d}\theta\\
+        &=\pi n(n+1)E_0j_n(kr)\int_{0}^{\pi}e^{ikr\cos\theta}
+            P_n(\cos\theta)\sin\theta \text{d}\theta\\
+        &=2\pi n(n+1)E_0 i^n j_n^2(kr)
+    \end{aligned}
+\end{equation}
+\par 最后一步是由于有以下等式成立：
+\begin{equation}
+    j_n(kr)=\frac{i^{-n}}{2}\int_{0}^{\pi}e^{ikr\cos\theta}P_n(\cos\theta)\sin\theta \text{d}\theta
+\end{equation}
+\par 分母部分的计算如下：
+\begin{equation}
+    \begin{aligned}
+        \int_{0}^{2\pi}\int_{0}^{\pi}|\bm{M}_{o1n}^{(1)}|^2 \sin\theta \text{d}\theta \text{d}\phi
+        &=j_n^2(kr)\int_{0}^{2\pi}\int_{0}^{\pi}\left[
+            \frac{1}{\sin^2\theta}\cos^2\phi\left(
+                P_n^1(\cos\theta)
+            \right)^2
+            +\sin^2\phi\left(
+                \frac{\text{d}P_n^1(\cos\theta)}{\text{d}\theta}
+            \right)^2
+        \right] \sin\theta \text{d}\theta \text{d}\phi\\
+        &=\pi j_n^2(kr)\int_{0}^{\pi}\left[
+            \frac{1}{\sin^2\theta}\left(
+                P_n^1(\cos\theta)
+            \right)^2
+            +\left(
+                \frac{\text{d}P_n^1(\cos\theta)}{\text{d}\theta}
+            \right)^2
+        \right] \sin\theta \text{d}\theta \\
+        &=\pi j_n^2(kr)\int_{0}^{\pi} n(n+1) \left(
+                P_n^1(\cos\theta)
+            \right)^2 \sin\theta \text{d}\theta\\
+        &=\frac{2\pi n^2(n+1)^2}{2n+1} j_n^2(kr)
+    \end{aligned}
+\end{equation}
 \par 通过一系列繁琐的计算，可以得到展开系数为
 \begin{gather}
     B_{o1n} = i^n E_0 \frac{2n+1}{n(n+1)}\\
@@ -345,7 +401,7 @@ $h_n^{(2)}(kr)$ 则表现为向内辐射的球面波，因此只能选取 $h_n^{
 \par 通过具体计算，可以得到四个方程：
 \begin{gather}
 j_n(\beta x) c_n + h_n^{(1)}(x) b_n = j_n(x)\\
-\mu \left[ \beta x j_n(\beta x) \right]' c_n + \mu_1 \left[ x h_n^{(1)}(x) \right]' c_n = \mu_1 \left[ x j_n(x) \right]'\\
+\mu \left[ \beta x j_n(\beta x) \right]' c_n + \mu_1 \left[ x h_n^{(1)}(x) \right]' b_n = \mu_1 \left[ x j_n(x) \right]'\\
 \mu \beta j_n(\beta x) d_n + \mu_1 h_n^{(1)}(x) a_n = \mu_1 j_n(x)\\
 \left[ \beta x j_n(\beta x) \right]' d_n + \beta \left[ x h_n^{(1)}(x) \right]' a_n = \beta \left[ x j_n(x) \right]'
 \end{gather}
@@ -355,9 +411,9 @@ j_n(\beta x) c_n + h_n^{(1)}(x) b_n = j_n(x)\\
     {\mu \beta^2j_n(\beta x) \left[ x h_n^{(1)}(x) \right]' - \mu_1 h_n^{(1)}(x) \left[ \beta x j_n(\beta x) \right]'}\\
     b_n = \frac{\mu_1 j_n(\beta x) \left[ x j_n(x) \right]' - \mu j_n(x) \left[ \beta x j_n(\beta x) \right]'}
     {\mu_1 j_n(\beta x) \left[ x h_n^{(1)}(x) \right]' - \mu h_n^{(1)}(x) \left[ \beta x j_n(\beta x) \right]'}\\
-    c_n = \frac{\mu_1 j_n(x) \left[ x h_n^{(1)}(x) \right]' - \mu_1 h_n^{(1)}(x)\left[ x j_n(x) \right]' j_n(x)}
+    c_n = \frac{\mu_1 j_n(x) \left[ x h_n^{(1)}(x) \right]' - \mu_1 h_n^{(1)}(x)\left[ x j_n(x) \right]'}
     {\mu_1 j_n(\beta x) \left[ x h_n^{(1)}(x) \right]' - \mu h_n^{(1)}(x) \left[ \beta x j_n(\beta x) \right]'}\\
-    d_n = \frac{\mu_1 \beta j_n(\beta x)\left[ x h_n^{(1)}(x) \right]' j_n(x) - \mu_1 h_n^{(1)}(x) \left[ x j_n(x) \right]'}
+    d_n = \frac{\mu_1 \beta j_n(x)\left[ x h_n^{(1)}(x) \right]' j_n(x) - \mu_1 \beta h_n^{(1)}(x) \left[ x j_n(x) \right]'}
     {\mu \beta^2j_n(\beta x) \left[ x h_n^{(1)}(x) \right]' - \mu_1 h_n^{(1)}(x) \left[ \beta x j_n(\beta x) \right]'}
 \end{gather}
 
@@ -431,8 +487,12 @@ $\bm{\hat{e}_i}=-\sin\zeta \bm{\hat{e}_x} - \cos\zeta \bm{\hat{e}_z}$。
 
 \par 在这种情况下，入射电场可以写为
 \begin{equation}
-    \bm{E}_i = E_0 (-\cos\zeta \bm{\hat{e}_x} + \sin\zeta \bm{\hat{e}_z}) 
-    e^{-ik(r\sin\zeta\cos\phi + z\cos\zeta)}
+    \begin{aligned}
+        \bm{E}_i &= E_0 (-\cos\zeta \bm{\hat{e}_x} + \sin\zeta \bm{\hat{e}_z}) 
+        e^{-ik(r\sin\zeta\cos\phi + z\cos\zeta)}\\
+        &= E_0 (-\cos\zeta\cos\phi \bm{\hat{e}_r}+\cos\zeta\sin\phi \bm{\hat{e}_\phi} + \sin\zeta \bm{\hat{e}_z}) 
+        e^{-ik(r\sin\zeta\cos\phi + z\cos\zeta)}
+    \end{aligned}
 \end{equation}
 \par 显然 $h$ 必须取值为 $-k\cos\zeta$。将 $\bm{E}_i$ 进行展开：
 \begin{equation}
@@ -441,7 +501,55 @@ $\bm{\hat{e}_i}=-\sin\zeta \bm{\hat{e}_x} - \cos\zeta \bm{\hat{e}_z}$。
         A_n \bm{M}_n^{(1)} + B_n \bm{N}_n^{(1)}
     \right)
 \end{equation}
-\par 同样进行一系列复杂的运算后得到
+\par 在进行具体计算前，先引入几个记号和公式：
+\begin{align}
+    \mathcal{G}_n^{(1)} &= \int_0^{2\pi} e^{-i(n\phi + \rho \cos \phi)} \text{d}\phi \\
+    \mathcal{G}_n^{(2)} &= \int_0^{2\pi} e^{-i(n\phi + \rho \cos \phi)} \cos \phi \text{d}\phi \\
+    \mathcal{G}_n^{(3)} &= \int_0^{2\pi} e^{-i(n\phi + \rho \cos \phi)} \sin \phi \text{d}\phi
+\end{align}
+\par 其中 $\rho = kr\sin\zeta$。利用第一类贝塞尔函数的积分表示式，有
+\begin{gather}
+    \mathcal{G}_n^{(1)} = 2\pi (-i)^n J_n(\rho)\\
+    \mathcal{G}_n^{(2)} = 2\pi i (-i)^{n} J_n'(\rho)\\
+    \mathcal{G}_n^{(3)} = 2\pi (-i)^{n} \frac{n}{\rho} J_n(\rho)  
+\end{gather}
+\par 这里以 $B_n$ 为例，为了具体计算展开系数，需要先计算其分子部分：
+\begin{equation}
+    \begin{aligned}
+        \int_{0}^{2\pi}\bm{E}_i\cdot\bm{N}_{n}^{(1)*} \text{d}\phi
+        &=E_0\frac{\sqrt{k^2-h^2}}{k}\left(
+            ih\cos\zeta\frac{\text{d}J_n(\rho)}{\text{d}\rho}\mathcal{G}_n^{(2)} 
+            -hn\cos\zeta \frac{J_n(\rho)}{\rho}\mathcal{G}_n^{(3)} 
+            +\sqrt{k^2-h^2}\sin\zeta J_n(\rho)\mathcal{G}_n^{(1)}
+        \right)\\
+        &=2\pi E_0(-i)^{n}\frac{\sqrt{k^2-h^2}}{k}\left[
+            \frac{h^2}{k}\left(\frac{\text{d}J_n(\rho)}{\text{d}\rho}\right)^2 
+            +\frac{h^2n^2}{k} \frac{J_n^2(\rho)}{\rho^2} 
+            +\frac{k^2-h^2}{k} J_n^2(\rho)
+        \right]
+    \end{aligned}
+\end{equation}
+\par 分母部分的计算如下：
+\begin{equation}
+    \begin{aligned}
+        \int_{0}^{2\pi}|\bm{N}_{n}^{(1)}|^2 \text{d}\phi
+        &=\frac{k^2-h^2}{k^2}\int_{0}^{2\pi}\left[
+            h^2\left(
+                \frac{\text{d}J_n(\rho)}{\text{d}\rho}
+            \right)^2
+            +h^2n^2\frac{J_n^2(\rho)}{\rho^2}
+            +(k^2-h^2) J_n^2(\rho)
+        \right] \text{d}\phi\\
+        &=2\pi\frac{k^2-h^2}{k^2}\left[
+            h^2\left(
+                \frac{\text{d}J_n(\rho)}{\text{d}\rho}
+            \right)^2
+            +h^2n^2\frac{J_n^2(\rho)}{\rho^2}
+            +(k^2-h^2) J_n^2(\rho)
+        \right]
+    \end{aligned}
+\end{equation}
+\par 综上我们得到 $B_n=E_0\dfrac{(-i)^n}{k\sin\zeta}$，同样进行一系列复杂的运算后得到
 \begin{equation}
     \bm{E}_i=\sum_{n=-\infty}^{\infty} E_n \bm{N}_n^{(1)}, 
     \qquad \bm{H}_i=\frac{-ik}{\omega\mu}
@@ -449,6 +557,17 @@ $\bm{\hat{e}_i}=-\sin\zeta \bm{\hat{e}_x} - \cos\zeta \bm{\hat{e}_z}$。
 \end{equation}
 \par 其中 $E_n=E_0\dfrac{(-i)^n}{k \sin\zeta}$。
 为了满足边界条件，假设散射场和内部场的级数展开式为：
+\begin{gather}
+    \bm{E}_s = -\sum_{n=-\infty}^{\infty} E_n \left(
+        ia_{n,\text{\Rmnum{1}}}\bm{M}_n^{(3)}+b_{n,\text{\Rmnum{1}}}\bm{N}_n^{(3)}
+    \right)\\
+    \bm{H}_s = \frac{ik}{\omega\mu}\sum_{n=-\infty}^{\infty} E_n \left(
+        ia_{n,\text{\Rmnum{1}}}\bm{N}_n^{(3)}+b_{n,\text{\Rmnum{1}}}\bm{M}_n^{(3)}
+    \right)
+\end{gather}
+\par 其中生成函数为
+$H_n^{(1)}(kr\sin\zeta)e^{in\phi}e^{-ikz\cos\zeta}$，
+$H_n^{(1)} = J_n + iY_n$ 是第一类汉克尔函数。 
 \begin{gather}
     \bm{E}_1 = \sum_{n=-\infty}^{\infty} E_n \left(
         g_n\bm{M}_n^{(1)}+f_n\bm{N}_n^{(1)}
@@ -461,17 +580,6 @@ $\bm{\hat{e}_i}=-\sin\zeta \bm{\hat{e}_x} - \cos\zeta \bm{\hat{e}_z}$。
 \par 其中 $k_1$ 和 $\mu_1$ 是圆柱体内部的波数和磁导率。生成函数为
 $J_n(kr\sqrt{\beta^2-\cos^2\zeta})e^{in\phi}e^{-ikz\cos\zeta}$，$\beta$ 
 为球内外波数的比值 $\dfrac{k_1}{k}$。
-\begin{gather}
-    \bm{E}_s = -\sum_{n=-\infty}^{\infty} E_n \left(
-        b_{n,\text{\Rmnum{1}}}\bm{N}_n^{(3)}+ia_{n,\text{\Rmnum{1}}}\bm{M}_n^{(3)}
-    \right)\\
-    \bm{H}_s = \frac{ik}{\omega\mu}\sum_{n=-\infty}^{\infty} E_n \left(
-        b_{n,\text{\Rmnum{1}}}\bm{M}_n^{(3)}+ia_{n,\text{\Rmnum{1}}}\bm{N}_n^{(3)}
-    \right)
-\end{gather}
-\par 其中生成函数为
-$H_n^{(1)}(kr\sin\zeta)e^{in\phi}e^{-ikz\cos\zeta}$，
-$H_n^{(1)} = J_n + iY_n$ 是第一类汉克尔函数。 
 \par 在分界面处有边界条件：
 \begin{equation}
     (\bm{E}_i+\bm{E}_s-\bm{E}_1)\times \bm{\hat{e}_r} =
@@ -485,93 +593,54 @@ $H_n^{(1)} = J_n + iY_n$ 是第一类汉克尔函数。
     \qquad H_{iz}+H_{sz}=H_{1z}
 \end{gather}
 \par 代入具体表达式后，可以得到四个方程：
-% \begin{gather}
-%     \frac{\xi}{x}(-hn)\frac{J_n(\xi)}{\xi}
-%     -ia_n\frac{\xi}{a}(-[H_n(\xi)]')-b_n\frac{\xi}{x}(-hn)\frac{H_n(\xi)}{\xi}
-%     =g_n\frac{\eta}{a}(-[J_n(\eta)]')+f_n\frac{\eta}{x}(-hn)\frac{J_n(\eta)}{\eta}\\
-%     \frac{\xi}{x}\frac{\xi}{a} J_n(\xi)
-%     -b_n  \frac{\xi}{x}\frac{\xi}{a} H_n(\xi)
-%     = f_n \frac{\eta}{x}\frac{\eta}{a} J_n(\eta)\\
-%     \frac{-ik}{\omega\mu}\frac{\xi}{a}(-[J_n(\xi)]')
-%     +\frac{ik}{\omega\mu}\left(b_n\frac{\xi}{a}(-[H_n(\xi)]')+ia_n\frac{\xi}{x}(-hn)\frac{H_n(\xi)}{\xi}\right)
-%     =\frac{-ik_1}{\omega\mu_1}\left(f_n\frac{\eta}{a}(-[J_n(\eta)]')+g_n\frac{\eta}{x}(-hn)\frac{J_n(\eta)}{\eta}\right)\\
-%     \frac{ik}{\omega\mu}i a_n  \frac{\xi}{x}\frac{\xi}{a} H_n(\xi)
-%     = \frac{-ik_1}{\omega\mu_1}g_n \frac{\eta}{x}\frac{\eta}{a} J_n(\eta)
-% \end{gather}
-
 \begin{gather}
     n \cos \zeta  J_n(\xi)
-    +i\xi[H_n(\xi)]'a_n-n \cos \zeta H_n(\xi)b_n
-    =-\eta[J_n(\eta)]'g_n+n \cos \zeta J_n(\eta)f_n\\
+    +i\xi H_n^{(1)'}(\xi)a_{n,\text{\Rmnum{1}}}-n \cos \zeta H_n^{(1)}(\xi)b_{n,\text{\Rmnum{1}}}
+    =-\eta J'_n(\eta)g_n+\frac{1}{\beta}n \cos \zeta J_n(\eta)f_n\\
     \frac{\xi^2}{\eta^2} J_n(\xi)
-    - \frac{\xi^2}{\eta^2} H_n(\xi) b_n
-    = J_n(\eta)f_n\\
-    \frac{\mu_1}{\mu} \xi  [J_n(\xi)]'
-    -\frac{\mu_1}{\mu} \xi[H_n(\xi)]' b_n +i \frac{\mu_1}{\mu} n\cos \zeta  H_n(\xi)a_n
-    =\beta \eta[J_n(\eta)]'f_n -\beta n \cos \zeta  J_n(\eta)g_n\\
-    i\frac{\mu_1}{\mu}\frac{\xi^2}{\eta^2} H_n(\xi) a_n 
-    = -\beta J_n(\eta) g_n
+    - \frac{\xi^2}{\eta^2} H_n^{(1)}(\xi) b_{n,\text{\Rmnum{1}}}
+    = \frac{1}{\beta}J_n(\eta)f_n\\
+    \frac{\mu_1}{\mu} \xi  J'_n(\xi)
+    -\frac{\mu_1}{\mu} \xi H_n^{(1)'}(\xi) b_{n,\text{\Rmnum{1}}} +i \frac{\mu_1}{\mu} n\cos \zeta  H_n^{(1)}(\xi)a_{n,\text{\Rmnum{1}}}
+    =\beta \eta J'_n(\eta)f_n -n \cos \zeta  J_n(\eta)g_n\\
+    i\frac{\mu_1}{\mu}\frac{\xi^2}{\eta^2} H_n^{(1)}(\xi) a_{n,\text{\Rmnum{1}}} 
+    = - J_n(\eta) g_n
 \end{gather}
 \par 为了简化计算，考虑$ \mu = \mu_1$的情况，并且消去 $f_n$ 和 $g_n$：
-
-% \begin{gather}
-%     n \cos \zeta  J_n(\xi)
-%     +i\xi[H_n(\xi)]'a_n-n \cos \zeta H_n(\xi)b_n
-%     =\eta[J_n(\eta)]'\frac{1}{\beta J_n(\eta)}i\frac{\xi^2}{\eta^2} H_n(\xi) a_n +n \cos \zeta \left(
-%         \frac{\xi^2}{\eta^2} J_n(\xi)
-%     - \frac{\xi^2}{\eta^2} H_n(\xi) b_n
-%     \right)\\
-%     \xi  [J_n(\xi)]'
-%     - \xi[H_n(\xi)]' b_n +i  n\cos \zeta  H_n(\xi)a_n
-%     =\beta \eta[J_n(\eta)]'\frac{1}{J_n(\eta)}\left(
-%         \frac{\xi^2}{\eta^2} J_n(\xi)
-%     - \frac{\xi^2}{\eta^2} H_n(\xi) b_n
-%     \right) + n \cos \zeta  i\frac{\xi^2}{\eta^2} H_n(\xi) a_n
-% \end{gather}
-
-% \begin{gather}
-%     \beta J_n(\eta)n \cos \zeta  J_n(\xi)
-%     +\beta J_n(\eta)i\xi[H_n(\xi)]'a_n-\beta J_n(\eta)n \cos \zeta H_n(\xi)b_n\\
-%     =\eta[J_n(\eta)]'i\frac{\xi^2}{\eta^2} H_n(\xi) a_n +\beta J_n(\eta)n \cos \zeta \left(
-%         \frac{\xi^2}{\eta^2} J_n(\xi)
-%     - \frac{\xi^2}{\eta^2} H_n(\xi) b_n
-%     \right)\\
-%     J_n(\eta)\xi  [J_n(\xi)]'
-%     - J_n(\eta)\xi[H_n(\xi)]' b_n +J_n(\eta)i  n\cos \zeta  H_n(\xi)a_n\\
-%     =\beta \eta[J_n(\eta)]'\left(
-%         \frac{\xi^2}{\eta^2} J_n(\xi)
-%     - \frac{\xi^2}{\eta^2} H_n(\xi) b_n
-%     \right) + J_n(\eta)n \cos \zeta  i\frac{\xi^2}{\eta^2} H_n(\xi) a_n
-% \end{gather}
-
-\begin{gather}
-    i\xi\left(
-        \beta \eta J_n(\eta)[H_n(\xi)]'
-    -\xi[J_n(\eta)]'H_n(\xi)
-    \right)a_n
-    +\beta n\cos \zeta \ \eta J_n(\eta)H_n(\xi)\left(
+\begin{equation}
+    \begin{aligned}
+        i\xi\left[
+        \eta J_n(\eta)H_n^{(1)'}(\xi)
+        -\xi J'_n(\eta)H_n^{(1)}(\xi)
+        \right]a_{n,\text{\Rmnum{1}}}
+        &+n\cos \zeta \ \eta J_n(\eta)H_n^{(1)}(\xi)\left(
+            \frac{\xi^2}{\eta^2} - 1
+        \right) b_{n,\text{\Rmnum{1}}}\\
+        &= n \cos \zeta\ \eta J_n(\eta)J_n(\xi)\left(
+            \frac{\xi^2}{\eta^2} - 1
+        \right)
+    \end{aligned}
+\end{equation}
+\begin{equation}
+    \begin{aligned}
+        n\cos \zeta\ \eta J_n(\eta)H_n^{(1)}(\xi)\left(
         \frac{\xi^2}{\eta^2} - 1
-    \right) b_n\\
-    =\beta n \cos \zeta\ \eta J_n(\eta)J_n(\xi)\left(
-        \frac{\xi^2}{\eta^2} - 1
-    \right)\\
-    n\cos \zeta\ \eta J_n(\eta)H_n(\xi)\left(
-    \frac{\xi^2}{\eta^2} - 1
-    \right)a_n
-    +i\xi\left(
-        \beta\xi H_n(\xi)[J_n(\eta)]'-\eta J_n(\eta)[H_n(\xi)]'
-    \right) b_n\\ 
-    =i\xi\left(
-        \beta\xi [J_n(\eta)]'
-        J_n(\xi)
-        -\eta J_n(\eta)  [J_n(\xi)]'
-    \right)
-\end{gather}
-
+        \right)a_{n,\text{\Rmnum{1}}}
+        +i\xi&\left[
+            \beta^2\xi J'_n(\eta)H_n^{(1)}(\xi)-\eta J_n(\eta)H_n^{(1)'}(\xi)
+        \right] b_{n,\text{\Rmnum{1}}}\\ 
+        &=i\xi\left[
+            \beta^2\xi J'_n(\eta)
+            J_n(\xi)
+            -\eta J_n(\eta)  J'_n(\xi)
+        \right]
+    \end{aligned}
+\end{equation}
 \par 解方程组后可以得到 $a_{n,\text{\Rmnum{1}}}$ 和 $b_{n,\text{\Rmnum{1}}}$:
 \begin{gather}
     a_{n ,\text{\Rmnum{1}}} = \frac{C_n V_n - B_n D_n}{W_n V_n + i D_n^2}
     \qquad b_{n ,\text{\Rmnum{1}}} = \frac{W_n B_n + i D_n C_n}{W_n V_n + i D_n^2}
+    \label{eq:scattered_coefficient_1}
 \end{gather}
 \begin{align}
     D_n &= n \cos \zeta \ \eta J_n(\eta) H_n^{(1)}(\xi) \left( \frac{\xi^2}{\eta^2} - 1 \right) \\
@@ -605,6 +674,7 @@ $x=ka$。
 \begin{gather}
     a_{n ,\text{\Rmnum{2}}} = -\frac{A_n V_n - iC_n D_n}{W_n V_n + i D_n^2}
     \qquad b_{n ,\text{\Rmnum{2}}} = -i\frac{C_n W_n + A_n D_n}{W_n V_n + i D_n^2}
+    \label{eq:scattered_coefficient_2}
 \end{gather}
 \par 其中 $D_n$，$C_n$，$V_n$ 以及 $W_n$ 与前面定义相同，另外
 \begin{equation}
@@ -612,44 +682,83 @@ $x=ka$。
         \xi J_n'(\eta) J_n(\xi) - \eta J_n(\eta) J_n'(\xi) 
     \right]
 \end{equation}
-\par 这一部分结果正确性尚未验证，因为下一节中的入射波属于这种情况，所以
-会在下一节中具体计算。
 
 \section{非局域理论\cite{ruppin_extinction_2001}}
 
-\par 这里想用 Mie 散射理论来研究金属纳米粒子的光学性质，
-具体逻辑还没理清楚，因此先把文献中的公式抄下来。
-
-\par 真空中电磁波是没有纵波的，但是在金属纳米粒子中，由于存在非局域效应，
-电磁波可以激发粒子内部的纵波。生成函数需要多添加一个纵波部分：
+\par 真空中电磁波是没有纵波的，因为无源要求电磁波满足散度方程。
+但是在金属纳米粒子中，如果考虑其内部的电子，
+可以激发出相应的纵波，因此生成函数需要多添加一个纵波部分：
 \begin{gather}
     \bm{M}_n = \nabla\times\left(
-        \bm{\hat{e}_z} Z_n(kr)e^{in\phi}e^{ihz}
+        \bm{\hat{e}_z} Z_n(\rho)e^{in\phi}e^{ihz}
     \right)\\
     \bm{N}_n = \frac{\nabla\times\bm{M}_n}{k}\\
     \bm{L}_n = \nabla\left(
-        Z_n(k_L r)e^{in\phi}e^{ihz}
+        Z_n(\rho)e^{in\phi}e^{ihz}
     \right)
 \end{gather}
-\par 考虑入射方向沿着 $x$ 轴，电场极化方向沿着 $y$ 轴的平面波入射，此时 $h=0$。
+\par 其中 $\rho=\sqrt{k^2-h^2}r$。
+考虑入射方向沿着 $x$ 轴，电场极化方向沿着 $y$ 轴的平面波入射，此时 $h=0$。
+\begin{equation}
+    \bm{M}_n =
+    k\left(
+        in\frac{Z_n(kr)}{kr} \bm{\hat{e}_r}
+        -\frac{\text{d}Z_n(kr)}{\text{d}(kr)} \bm{\hat{e}_\phi}
+    \right)e^{in\phi}
+\end{equation}
+\begin{equation}
+    \bm{N}_n =
+            k Z_n(kr) \bm{\hat{e}_z}
+        e^{in\phi}
+\end{equation}
+\begin{equation}
+    \bm{L}_n =
+    k\left(
+        \frac{\text{d}Z_n(kr)}{\text{d}(kr)} \bm{\hat{e}_r}
+        +in\frac{Z_n(kr)}{kr} \bm{\hat{e}_\phi}
+    \right)e^{in\phi}
+\end{equation}
+\par 设 $E_n=\dfrac{i^n}{k}$，入射场级数展开式为：
 \begin{gather}
     \bm{E}_i = \bm{\hat{e}_y}e^{ikr\cos\phi}
+            = i \sum_{n=-\infty}^{\infty} E_n \bm{M}_n^{(1)}(kr)
             = \frac{i}{k} \sum_{n=-\infty}^{\infty} i^n \bm{M}_n^{(1)}(kr)\\
-    \bm{H}_i = \frac{\sqrt{\varepsilon_m}}{k} \sum_{n=-\infty}^{\infty} i^n \bm{N}_n^{(1)}(kr)
+    \bm{H}_i = \frac{k}{\omega\mu_0}\sum_{n=-\infty}^{\infty}E_n\bm{N}_n^{(1)}(kr)
+    = \sqrt{\varepsilon_m}\sqrt{\frac{\varepsilon_0}{\mu_0}}\sum_{n=-\infty}^{\infty}E_n\bm{N}_n^{(1)}(kr)
+    = \frac{\sqrt{\varepsilon_m}}{k}\sqrt{\frac{\varepsilon_0}{\mu_0}}\sum_{n=-\infty}^{\infty}i^n\bm{N}_n^{(1)}(kr)
 \end{gather}
 \par 内部场级数展开式为：
 \begin{gather}
-    \bm{E}_{1,T} = \frac{i}{k_T} \sum_{n=-\infty}^{\infty} i^n g_n\bm{M}_n^{(1)}(k_T r)\\
-    \bm{H}_{1,T} = \frac{\sqrt{\varepsilon_m}}{k} \sum_{n=-\infty}^{\infty} i^n g_n\bm{N}_n^{(1)}(k_Tr)\\
-    \bm{E}_{1,L} = \frac{i}{k}\sum_{n=-\infty}^{\infty} i^n f_n \bm{L}_n(k_L r)\\
+    \bm{E}_{1,T} = \frac{i}{k_T} \sum_{n=-\infty}^{\infty} i^n g_n\bm{M}_n^{(1)}(k_Tr)\\
+    \bm{H}_{1,T} = \frac{\sqrt{\varepsilon_m}}{k}\sqrt{\frac{\varepsilon_0}{\mu_0}}\sum_{n=-\infty}^{\infty}i^n g_n\bm{N}_n^{(1)}(k_Tr)\\
+    \bm{E}_{1,L} = \frac{i}{k} \sum_{n=-\infty}^{\infty} i^n f_n\bm{L}_n^{(1)}(k_Lr)\\
     \bm{H}_{1,L} = 0
 \end{gather}
 \par 散射场级数展开式为：
 \begin{gather}
-    \bm{E}_s = -\frac{i}{k} \sum_{n=-\infty}^{\infty} i^n a_n \bm{M}_n^{(3)}(kr)\\
-    \bm{H}_s = \frac{\sqrt{\varepsilon_m}}{k} \sum_{n=-\infty}^{\infty} i^n a_n \bm{N}_n^{(3)}(kr)
+    \bm{E}_s = \frac{i}{k} \sum_{n=-\infty}^{\infty} i^n a_n \bm{M}_n^{(3)}(kr)\\
+    \bm{H}_s = \frac{\sqrt{\varepsilon_m}}{k}\sqrt{\frac{\varepsilon_0}{\mu_0}}\sum_{n=-\infty}^{\infty}i^n a_n \bm{N}_n^{(3)}(kr)
 \end{gather}
-\par 通过边界条件可以得到方程：
+\par 这里有两个可能会引起疑惑的点：
+\begin{itemize}
+    \item 为什么内部场和散射场的级数展开中只有 $\bm{M}_n$ 而没有 $\bm{N}_n$？\\
+            因此 $\zeta=90^{\circ}$ 是一种特殊情况，电磁波垂直入射。即使假设 $\bm{N}_n$
+            前面的系数代入计算，最后也会得到为 0。这种情况类似于式 \eqref{eq:scattered_coefficient_2} 中，
+            由于当 $\zeta=90^{\circ}$ 时 $C_n$ 和 $D_n$ 为 0，$b_{n,\text{\Rmnum{2}}}=0$。
+    \item 为什么内部场和散射场的级数展开看起来怪怪的？\\
+            例如 $E_{1,L}$ 前面的系数为什么是 $\dfrac{i}{k}$ 而不是 $\dfrac{i}{k_L}$。这是为了
+            方便在边界条件中的具体计算，实际上这个系数并不影响最终的结果。
+            需要注意的是，用于计算消光截面的系数一定是归一化后的系数，也就是散射场与入射场的全部系数比值：
+            \begin{equation}
+                \text{scattering coefficient} = \frac{ia_n/k}{i/k} = a_n
+            \end{equation}
+\end{itemize}
+\par 在分界面处有边界条件：
+\begin{equation}
+    (\bm{E}_i+\bm{E}_s-\bm{E}_{1,T}-\bm{E}_{1,L})\times \bm{\hat{e}_r} =
+    (\bm{H}_i+\bm{H}_s-\bm{H}_{1,T})\times \bm{\hat{e}_r} = 0
+\end{equation}
+\par 也就是：
 \begin{gather}
     J_n'(ka)+a_n H_n^{(1)'}(ka) = g_n J_n'(k_T a) - \frac{in}{k a}f_n J_n(k_L a)\\
     \sqrt{\varepsilon_m}\left[ J_n(ka) + a_n H_n^{(1)}(ka) \right]
@@ -667,11 +776,19 @@ $x=ka$。
 \end{gather}
 \par 通过以上式子可以解得：
 \begin{gather}
-    a_n = \frac{-j_n(ka)\left[j_n(k_T a)+\alpha_n\right]
-    +j_n(k_T a) j_n'(ka)/\sqrt{\varepsilon_m}}
-    {h_n^{(1)}(ka)\left[j_n(k_T a)+\alpha_n\right]
-    -j_n(k_T a) h_n^{(1)'}(ka)/\sqrt{\varepsilon_m}}
+    a_n = -\frac{c_nJ_n(ka)+\sqrt{\varepsilon_m}J_n(ka)J'_n(k_Ta)
+    -\sqrt{\varepsilon_T}J'_n(ka)J_n(k_Ta)}
+    {c_nH_n^{(1)}(ka)+\sqrt{\varepsilon_m}H_n^{(1)}(ka)J'_n(k_Ta)
+    -\sqrt{\varepsilon_T}H_n^{(1)'}(ka)J_n(k_Ta)}
 \end{gather}
+\par 其中
+\begin{equation}
+    c_n = \frac{n^2}{k_La}\frac{J_n(k_La)}{J'_n(k_La)}
+    J_n(k_Ta)\left(
+        \frac{\sqrt{\varepsilon_T}}{ka}
+        -\frac{\sqrt{\varepsilon_m}}{k_Ta}
+    \right)
+\end{equation}
 
 % ===============================================
 
