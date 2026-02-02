@@ -1,0 +1,665 @@
+\documentclass[a4paper]{article}
+\usepackage{ctex}
+\usepackage[affil-it]{authblk}
+\usepackage[backend=bibtex,style=numeric]{biblatex}
+\usepackage{amsmath,amsthm,amssymb,amsfonts}
+\usepackage{mathrsfs}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{geometry}
+
+\geometry{margin=1.5cm, vmargin={0pt,1cm}}
+\setlength{\topmargin}{-1cm}
+\setlength{\paperheight}{29.7cm}
+\setlength{\textheight}{25.3cm}
+
+\addbibresource{citation.bib}
+
+\newcommand{\Rmnum}[1]{\uppercase\expandafter{\romannumeral #1}}  
+\newcommand{\rmnum}[1]{\romannumeral #1}
+
+\begin{document}
+% =================================================
+\title{FDTD 求解器}
+
+\author{zsh945
+  \thanks{邮箱: \texttt{3097714673@qq.com}}}
+
+\date{更新时间: \today}
+
+\maketitle
+
+% ============================================
+\section{Yee 网格\cite{jin_theory_2015}}
+
+\par 一般的数值微分算法拓展到三维问题会遇到一些严重的问题。
+\begin{itemize}
+    \item 当网格点位于两种不同媒质的分界面上时，为了保证切向场的连续和法向场的不连续，
+    需要进行相当烦琐的处理。
+    \item 当一个网格点位于导体或媒质的边缘
+    或拐角时，这一点的法向没有明确的定义，而其场分量可能是无限大的，即奇异的，因此这
+    个网格点处的场值无法精确描述。
+\end{itemize}
+\par 而 Yee 网格作为一种独特的离散方法，成功地解决了这些问题。
+考虑时域 Maxwell 方程组：
+\begin{align}
+    \label{eq:Yee 三维 Maxwell 方程组-矢量形式-1}
+    \nabla \times \bm{\mathcal{E}} &= -\mu \frac{\partial \bm{\mathcal{H}}}{\partial t}\\
+    \label{eq:Yee 三维 Maxwell 方程组-矢量形式-2}
+    \nabla \times \bm{\mathcal{H}} &= 
+    \varepsilon \frac{\partial \bm{\mathcal{E}}}{\partial t}
+    +\sigma \bm{\mathcal{E}}
+    +\bm{\mathcal{J}}_i
+\end{align}
+\par 这两个矢量方程可以写成 6 个标量方程
+\begin{align}
+    \label{eq:Yee 三维 Maxwell 方程组-1}
+    \frac{\partial \mathcal{E}_z}{\partial y}
+    -\frac{\partial \mathcal{E}_y}{\partial z}
+    &= -\mu \frac{\partial \mathcal{H}_x}{\partial t}\\
+    \label{eq:Yee 三维 Maxwell 方程组-2}
+    \frac{\partial \mathcal{E}_x}{\partial z}
+    -\frac{\partial \mathcal{E}_z}{\partial x}
+    &= -\mu \frac{\partial \mathcal{H}_y}{\partial t}\\
+    \label{eq:Yee 三维 Maxwell 方程组-3}
+    \frac{\partial \mathcal{E}_y}{\partial x}
+    -\frac{\partial \mathcal{E}_x}{\partial y}
+    &= -\mu \frac{\partial \mathcal{H}_z}{\partial t}\\
+    \label{eq:Yee 三维 Maxwell 方程组-4}
+    \frac{\partial \mathcal{H}_z}{\partial y}
+    -\frac{\partial \mathcal{H}_y}{\partial z}
+    &= \varepsilon \frac{\partial \mathcal{E}_x}{\partial t}
+    +\sigma \mathcal{E}_x + \mathcal{J}_x\\
+    \label{eq:Yee 三维 Maxwell 方程组-5}
+    \frac{\partial \mathcal{H}_x}{\partial z}
+    -\frac{\partial \mathcal{H}_z}{\partial x}
+    &= \varepsilon \frac{\partial \mathcal{E}_y}{\partial t}
+    +\sigma \mathcal{E}_y + \mathcal{J}_y\\
+    \label{eq:Yee 三维 Maxwell 方程组-6}
+    \frac{\partial \mathcal{H}_y}{\partial x}
+    -\frac{\partial \mathcal{H}_x}{\partial y}
+    &= \varepsilon \frac{\partial \mathcal{E}_z}{\partial t}
+    +\sigma \mathcal{E}_z + \mathcal{J}_z
+\end{align}
+\par 如图 \ref{fig:YeeLattice_3D} 所示，在单元每条边的中心位置
+对电场分量采样，在单元每个面的中心位置对磁场分量采样。
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.4\textwidth]{./image/YeeLattice_3D.png}
+    \caption{Yee 网格三维示意图}
+    \label{fig:YeeLattice_3D}
+\end{figure}
+\par 对于 Yee 网格，
+式 (\ref{eq:Yee 三维 Maxwell 方程组-1})
+到式 (\ref{eq:Yee 三维 Maxwell 方程组-6})
+的时间步进公式分别为
+\begin{equation}
+    \begin{aligned}
+        \mathcal{H}_x^{n+\frac{1}{2}}\left(i,j+\frac{1}{2},k+\frac{1}{2}\right)=
+        &\ \mathcal{H}_x^{n-\frac{1}{2}}\left(i,j+\frac{1}{2},k+\frac{1}{2}\right)\\
+        &-\frac{\Delta t}{\mu \Delta y}\left[
+            \mathcal{E}_z^n\left(i,j+1,k+\frac{1}{2}\right)
+            -\mathcal{E}_z^n\left(i,j,k+\frac{1}{2}\right)
+        \right]\\
+        &+\frac{\Delta t}{\mu \Delta z}\left[
+            \mathcal{E}_y^n\left(i,j+\frac{1}{2},k+1\right)
+            -\mathcal{E}_y^n\left(i,j+\frac{1}{2},k\right)
+        \right]
+    \end{aligned}
+    \label{eq:Yee 三维时间步进公式-1}
+\end{equation}
+\begin{equation}
+    \begin{aligned}
+        \mathcal{H}_y^{n+\frac{1}{2}}\left(i+\frac{1}{2},j,k+\frac{1}{2}\right)=
+        &\ \mathcal{H}_y^{n-\frac{1}{2}}\left(i+\frac{1}{2},j,k+\frac{1}{2}\right)\\
+        &-\frac{\Delta t}{\mu \Delta z}\left[
+            \mathcal{E}_x^n\left(i+\frac{1}{2},j,k+1\right)
+            -\mathcal{E}_x^n\left(i\frac{1}{2},j,k\right)
+        \right]\\
+        &+\frac{\Delta t}{\mu \Delta x}\left[
+            \mathcal{E}_z^n\left(i+1,j,k+\frac{1}{2}\right)
+            -\mathcal{E}_z^n\left(i,j,k+\frac{1}{2}\right)
+        \right]
+    \end{aligned}
+    \label{eq:Yee 三维时间步进公式-2}
+\end{equation}
+\begin{equation}
+    \begin{aligned}
+        \mathcal{H}_z^{n+\frac{1}{2}}\left(i+\frac{1}{2},j+\frac{1}{2},k\right)=
+        &\ \mathcal{H}_z^{n-\frac{1}{2}}\left(i+\frac{1}{2},j+\frac{1}{2},k\right)\\
+        &-\frac{\Delta t}{\mu \Delta x}\left[
+            \mathcal{E}_y^n\left(i+1,j+\frac{1}{2},k\right)
+            -\mathcal{E}_y^n\left(i,j+\frac{1}{2},k\right)
+        \right]\\
+        &+\frac{\Delta t}{\mu \Delta y}\left[
+            \mathcal{E}_x^n\left(i+\frac{1}{2},j+1,k\right)
+            -\mathcal{E}_x^n\left(i+\frac{1}{2},j,k\right)
+        \right]
+    \end{aligned}
+    \label{eq:Yee 三维时间步进公式-3}
+\end{equation}
+\begin{equation}
+    \begin{aligned}
+        \mathcal{E}_x^{n+1}\left(i+\frac{1}{2},j,k\right)=
+        &\ \frac{1}{\beta\left(i+\frac{1}{2},j,k\right)}
+        \Bigg\{\alpha\left(i+\frac{1}{2},j,k\right)
+        \mathcal{E}_x^n\left(i+\frac{1}{2},j,k\right)\\
+        &+\frac{1}{\Delta y}\left[
+            \mathcal{H}_z^{n+\frac{1}{2}}\left(i+\frac{1}{2},j+\frac{1}{2},k\right)
+            -\mathcal{H}_z^{n+\frac{1}{2}}\left(i+\frac{1}{2},j-\frac{1}{2},k\right)
+        \right]\\
+        &-\frac{1}{\Delta z}\left[
+            \mathcal{H}_y^{n+\frac{1}{2}}\left(i+\frac{1}{2},j,k+\frac{1}{2}\right)
+            -\mathcal{H}_y^{n+\frac{1}{2}}\left(i+\frac{1}{2},j,k-\frac{1}{2}\right)
+        \right]\\
+        &-\mathcal{J}_x^{n+\frac{1}{2}}\left(i+\frac{1}{2},j,k\right)
+        \Bigg\}
+    \end{aligned}
+    \label{eq:Yee 三维时间步进公式-4}
+\end{equation}
+\begin{equation}
+    \begin{aligned}
+        \mathcal{E}_y^{n+1}\left(i,j+\frac{1}{2},k\right)=
+        &\ \frac{1}{\beta\left(i,j+\frac{1}{2},k\right)}
+        \Bigg\{\alpha\left(i,j+\frac{1}{2},k\right)
+        \mathcal{E}_y^n\left(i,j+\frac{1}{2},k\right)\\
+        &+\frac{1}{\Delta z}\left[
+            \mathcal{H}_x^{n+\frac{1}{2}}\left(i,j+\frac{1}{2},k+\frac{1}{2}\right)
+            -\mathcal{H}_x^{n+\frac{1}{2}}\left(i,j+\frac{1}{2},k-\frac{1}{2}\right)
+        \right]\\
+        &-\frac{1}{\Delta x}\left[
+            \mathcal{H}_z^{n+\frac{1}{2}}\left(i+\frac{1}{2},j+\frac{1}{2},k\right)
+            -\mathcal{H}_z^{n+\frac{1}{2}}\left(i-\frac{1}{2},j+\frac{1}{2},k\right)
+        \right]\\
+        &-\mathcal{J}_y^{n+\frac{1}{2}}\left(i,j+\frac{1}{2},k\right)
+        \Bigg\}
+    \end{aligned}
+    \label{eq:Yee 三维时间步进公式-5}
+\end{equation}
+\begin{equation}
+    \begin{aligned}
+        \mathcal{E}_z^{n+1}\left(i,j,k+\frac{1}{2}\right)=
+        &\ \frac{1}{\beta\left(i,j,k+\frac{1}{2}\right)}
+        \Bigg\{\alpha\left(i,j,k+\frac{1}{2}\right)
+        \mathcal{E}_z^n\left(i,j,k+\frac{1}{2}\right)\\
+        &+\frac{1}{\Delta x}\left[
+            \mathcal{H}_y^{n+\frac{1}{2}}\left(i+\frac{1}{2},j,k+\frac{1}{2}\right)
+            -\mathcal{H}_y^{n+\frac{1}{2}}\left(i-\frac{1}{2},j,k+\frac{1}{2}\right)
+        \right]\\
+        &-\frac{1}{\Delta y}\left[
+            \mathcal{H}_x^{n+\frac{1}{2}}\left(i,j+\frac{1}{2},k+\frac{1}{2}\right)
+            -\mathcal{H}_x^{n+\frac{1}{2}}\left(i,j-\frac{1}{2},k+\frac{1}{2}\right)
+        \right]\\
+        &-\mathcal{J}_z^{n+\frac{1}{2}}\left(i,j,k+\frac{1}{2}\right)
+        \Bigg\}
+    \end{aligned}
+    \label{eq:Yee 三维时间步进公式-6}
+\end{equation}
+\par 其中 $\alpha(i,j)=\dfrac{\varepsilon}{\Delta t}-\dfrac{\sigma}{2}$，
+$\beta(i,j)=\dfrac{\varepsilon}{\Delta t}+\dfrac{\sigma}{2}$。
+\par 给定源电流、电场和磁场的初始值及边界条件，使用
+式 (\ref{eq:Yee 三维时间步进公式-1}) 至
+式 (\ref{eq:Yee 三维时间步进公式-3}) 计算下一个时间步的
+磁场，然后用
+式 (\ref{eq:Yee 三维时间步进公式-4}) 至
+式 (\ref{eq:Yee 三维时间步进公式-6}) 计算下一个时间步的电
+场。
+\par 为了保证时间步进的稳定性，其时间步长应满足稳定性条件
+\begin{equation}
+    \Delta t \leq \frac{\sqrt{\mu \varepsilon}}
+    {\sqrt{\frac{1}{(\Delta x)^2}+\frac{1}{(\Delta y)^2}+\frac{1}{(\Delta z)^2}}}
+\end{equation}
+\par 将数值色散误差公式拓展到三维情况，其表达式为
+\begin{equation}
+    \frac{\tilde{k}-k}{k}
+    \approx\frac{1}{24}
+    \Bigg\{
+        \Big[
+            (k\Delta x)^2\cos^4\phi_i
+            +(k\Delta y)^2\sin^4\phi_i
+        \Big]\sin^4\theta_i
+        +(k\Delta z)^2\cos^4\theta_i
+        -(\omega \Delta t)^2
+    \Bigg\}
+\end{equation}
+\par 其中 $(\phi_i,\theta_i)$ 表示波的传播方向。
+若选择 $\Delta x=\Delta y=\Delta z = h$ 和 $\Delta t = \frac{0.5h}{c}$，则数值相位误差为
+\begin{equation}
+    \begin{aligned}
+        \frac{\tilde{k}-k}{k}
+        &\approx\frac{(kh)^2}{24}
+        \Bigg\{
+            \Big[
+                \cos^4\phi_i
+                +\sin^4\phi_i
+            \Big]\sin^4\theta_i
+            +\cos^4\theta_i
+            -\frac{1}{4}
+        \Bigg\}\\
+        &=\frac{\pi^2}{6}\left(\frac{h}{\lambda}\right)^2
+        \Bigg\{
+            \Big[
+                \cos^4\phi_i
+                +\sin^4\phi_i
+            \Big]\sin^4\theta_i
+            +\cos^4\theta_i
+            -\frac{1}{4}
+        \Bigg\}
+    \end{aligned}
+\end{equation}
+
+\section{完美匹配层\cite{jin_theory_2015}}
+
+\par 完美匹配层是一种通过理论上推导的人为设计的材料，可以设计
+成对任意频率、任意极化和任意角度的平面波入射都完全吸收。
+
+\subsection{频域分析}
+\par 为了推导得到完美匹配层，
+首先考虑无源情况下的修正 Maxwell 方程：
+\begin{gather}
+    \label{eq:corrected_curl_E}
+    \nabla_s\times\bm{E}=-i\omega\mu\bm{H}\\
+    \label{eq:corrected_curl_H}
+    \nabla_s\times\bm{H}=i\omega\varepsilon\bm{E}\\ 
+    \label{eq:corrected_div_E}
+    \nabla_s\cdot(\varepsilon\bm{E})=0\\
+    \label{eq:corrected_div_H}
+    \nabla_s\cdot(\mu\bm{H})=0
+\end{gather}
+\par 其中 $\nabla_s$ 定义为
+\begin{equation}
+    \nabla_s=
+    \bm{\hat{e}_x}\frac{1}{s_x}\frac{\partial}{\partial x}
+    +\bm{\hat{e}_y}\frac{1}{s_y}\frac{\partial}{\partial y}
+    +\bm{\hat{e}_z}\frac{1}{s_z}\frac{\partial}{\partial z}
+    \label{eq:definition_of_nabla_s}
+\end{equation}
+\par $\nabla_s$ 可认为是 $x$、$y$ 和 $z$ 轴
+分别被 $s_x$、$s_y$ 和 $s_z$ 因子拉伸的
+的 $\nabla$ 算子。然后
+考虑一个平面波，其电场和磁场分别为
+\begin{align}
+    \bm{E}&=\bm{E}_0e^{-i\bm{k}\cdot\bm{r}}
+    =\bm{E}_0e^{-i(k_x x+k_y y+k_z z)}\\
+    \bm{H}&=\bm{H}_0e^{-i\bm{k}\cdot\bm{r}}
+    =\bm{H}_0e^{-i(k_x x+k_y y+k_z z)}
+\end{align}
+\par 将上述电场和磁场代入修正 Maxwell 方程组，得到
+\begin{align}
+    \label{eq:corrected_k_curl_E}
+    \bm{k}_s\times\bm{E}&=\omega\mu\bm{H}\\
+    \label{eq:corrected_k_curl_H}
+    \bm{k}_s\times\bm{H}&=-\omega\varepsilon\bm{E}\\
+    \label{eq:corrected_k_div_E}
+    \bm{k}_s\cdot\bm{E}&=0\\
+    \label{eq:corrected_k_div_H}
+    \bm{k}_s\cdot\bm{H}&=0
+\end{align}
+\par 其中
+\begin{equation}
+    \bm{k}_s=\bm{\hat{e}_x}\frac{k_x}{s_x}
+    +\bm{\hat{e}_y}\frac{k_y}{s_y}
+    +\bm{\hat{e}_z}\frac{k_z}{s_z}
+\end{equation}
+\par 对式 \eqref{eq:corrected_k_curl_E}
+两边叉乘 $\bm{k}_s$，得到
+\begin{equation}
+    \bm{k}_s\times(\bm{k}_s\times\bm{E})
+    =\omega\mu\bm{k}_s\times\bm{H}
+    =-\omega^2\mu\varepsilon\bm{E}
+\end{equation}
+\par 又由于 $\bm{k}_s\times(\bm{k}_s\times\bm{E})=
+\bm{k}_s(\bm{k}_s\cdot\bm{E})
+-(\bm{k}_s\cdot\bm{k}_s)\bm{E}$
+以及 $\bm{k}_s\cdot\bm{E}=0$，上式变为
+\begin{equation}
+    (\bm{k}_s\cdot\bm{k}_s)\bm{E}
+    =\omega^2\varepsilon\mu\bm{E}
+\end{equation}
+\par 由此得到色散关系式为
+\begin{equation}
+    \bm{k}_s\cdot\bm{k}_s
+    =\omega^2\varepsilon\mu=k^2
+\end{equation}
+\par 代入 $\bm{k}_s$ 的表达式，得到
+\begin{equation}
+    \left(
+        \frac{k_x}{s_x}
+    \right)^2
+    +\left(
+        \frac{k_y}{s_y}
+    \right)^2
+    +\left(
+        \frac{k_z}{s_z}
+    \right)^2=k^2
+\end{equation}
+\par 满足修正 Maxwell 方程组的电磁波的色散关系为
+\begin{equation}
+    \left(
+        \frac{k_x}{s_x}
+    \right)^2
+    +\left(
+        \frac{k_y}{s_y}
+    \right)^2
+    +\left(
+        \frac{k_z}{s_z}
+    \right)^2=k^2
+\end{equation}
+\par 此方程的解为
+\begin{equation}
+    \left\{
+        \begin{aligned}
+            k_x&=k s_x\sin \theta \cos \phi\\
+            k_y&=k s_y\sin \theta \sin \phi\\
+            k_z&=k s_z\cos \theta
+        \end{aligned}
+    \right.
+\end{equation}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.4\textwidth]{./image/PlaneWave_PML.png}
+    \caption{平面波入射示意图}
+    \label{fig:PlaneWave_PML}
+\end{figure}
+\par 如图 \ref{fig:PlaneWave_PML} 所示，
+考虑电磁波在拉伸坐标系中两个半空间分界面处的反射情况。
+分界面与$xOy$平面
+重合，对于$\text{TE}_z$ 入射的情况，入射波、反射波和
+透射波的电场可分别写为：
+\begin{align}
+    \bm{E}_i&=\bm{\hat{e}_z} E_0 e^{-i\bm{k}_i\cdot\bm{r}}\\
+    \bm{E}_r&=R_{\text{TE}}\bm{\hat{e}_z} E_0 
+    e^{-i\bm{k}_r\cdot\bm{r}}\\
+    \bm{E}_t&=T_{\text{TE}}\bm{\hat{e}_z} E_0 
+    e^{-i\bm{k}_t\cdot\bm{r}}
+\end{align}
+\par 对于 $\text{TE}_z$ 入射的情况，
+使用相位匹配条件及 $\bm{E}$ 与 $\bm{H}$ 的切向分量连续条件，可以得到
+\begin{equation}
+    R_{\text{TE}}
+    =\frac{k_{1z}s_{2z}\mu_2-k_{2z}s_{1z}\mu_1}
+    {k_{1z}s_{2z}\mu_2+k_{2z}s_{1z}\mu_1}
+\end{equation}
+\par 其中，下标 1 表示上半空间的媒质参数，
+下标 2 表示下半空间的媒质参数。
+类似地，可以得
+到 $\text{TM}_z$ 入射时的反射系数为
+\begin{equation}
+    R_{\text{TM}}
+    =\frac{k_{1z}s_{2z}\varepsilon_2-k_{2z}s_{1z}\varepsilon_1}
+    {k_{1z}s_{2z}\varepsilon_2+k_{2z}s_{1z}\varepsilon_1}
+\end{equation}
+\par 若选择 $\varepsilon_1=\varepsilon_2$、
+$\mu_1=\mu_2$、
+$s_{1x}=s_{2x}$ 以及 $s_{1y}=s_{2y}$，可以得到
+\begin{equation}
+    R_{\text{TE}}=0
+    \qquad
+    R_{\text{TM}}=0
+\end{equation}
+上式在以下任何情形下均成立
+\begin{itemize}
+    \item 任意的 $s_{1z}$ 和 $s_{2z}$
+    \item 任意的 $\theta$ 和 $\phi$
+    \item 任意的频率
+\end{itemize}
+\par 由于位于 $xOy$ 平面的理想匹配分界面
+与 $s_{1z}$ 和 $s_{2z}$ 无关，选择任意的 $s_{1z}$ 
+和 $s_{2z}$ 均不会引起任何反射。
+\par 如果选择 $s_{2z}=s'-js''$，
+其中 $s'$ 和 $s''$ 是实数，
+且有 $s'\geq1$和 $s''\geq0$，
+则 $k_{2z}=k_2(s'-js'')\cos \theta$。
+因此，透射波将在负 $z$ 方向指数衰减。
+若我们将媒质 2 截断成厚度为 $L$ 的
+介质层，并在其后放置一块导电平面，则其反射系数的幅度变为：
+\begin{equation}
+    |R(\theta)|=e^{-2k_2\cos \theta \int_{0}^{L}s''(z) \text{d}z}
+\end{equation}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\textwidth]{./image/Calculation_Domain.png}
+    \caption{二维完美匹配层截断计算域示意图}
+    \label{fig:Calculation_Domain}
+\end{figure}
+\par 以导电面为衬底的完美匹配层可用于时域有限差分仿真中的计算区域截断。
+如图 \ref{fig:Calculation_Domain} 所示，
+用以导电面为衬底的完美匹配层包裹感兴趣的计算区域。完美匹配
+层区域介质的参数选择取决于具体的位置。
+
+\subsection{时域分析}
+
+\subsubsection{分裂场矢量法}
+
+\par 首先要把式 \eqref{eq:corrected_curl_E} 
+到 \eqref{eq:corrected_div_H} 的修正Maxwell方程组变换到时域，根据
+式 \eqref{eq:definition_of_nabla_s} 可以得到
+\begin{equation}
+    \nabla_s\times\bm{E}
+    =\frac{1}{s_x}\frac{\partial}{\partial x}
+    \left(
+        \bm{\hat{e}_x} \times\bm{E}
+    \right)
+    +\frac{1}{s_y}\frac{\partial}{\partial y}
+    \left(
+        \bm{\hat{e}_y} \times\bm{E}
+    \right)
+    +\frac{1}{s_z}\frac{\partial}{\partial z}
+    \left(
+        \bm{\hat{e}_z} \times\bm{E}
+    \right)    
+\end{equation}
+\par 我们把磁场分裂为三个矢量分量：
+\begin{equation}
+    \bm{H}=\bm{H}_{sx}+\bm{H}_{sy}+\bm{H}_{sz}
+\end{equation}
+\par 其中
+\begin{align}
+    \label{eq:definition_of_H_sx}
+    \frac{1}{s_x}\frac{\partial}{\partial x}
+    \left(
+        \bm{\hat{e}_x} \times\bm{E}
+    \right)&=-i\omega\mu\bm{H}_{sx}\\
+    \label{eq:definition_of_H_sy}
+    \frac{1}{s_y}\frac{\partial}{\partial y}
+    \left(
+        \bm{\hat{e}_y} \times\bm{E}
+    \right)&=-i\omega\mu\bm{H}_{sy}\\
+    \label{eq:definition_of_H_sz}
+    \frac{1}{s_z}\frac{\partial}{\partial z}
+    \left(
+        \bm{\hat{e}_z} \times\bm{E}
+    \right)&=-i\omega\mu\bm{H}_{sz}
+\end{align}
+\par 选取 $s_x$ 、$s_y$ 和 $s_z$ 为
+\begin{equation}
+    s_x=1+\frac{\sigma_x}{i\omega\varepsilon}
+    \qquad
+    s_y=1+\frac{\sigma_y}{i\omega\varepsilon}
+    \qquad
+    s_z=1+\frac{\sigma_z}{i\omega\varepsilon}
+    \label{eq:definition_of_sx_sy_sz}
+\end{equation}
+\par 将上述 $s_x$ 、$s_y$ 和 $s_z$代入
+式 \eqref{eq:definition_of_H_sx} 至
+\eqref{eq:definition_of_H_sz}，并进行时域变换，
+可以得到
+\begin{align}
+    \label{eq:time_domain_H_sx}
+    \frac{\partial}{\partial x}
+    \left(
+        \bm{\hat{e}_x} \times\bm{\mathcal{E}}
+    \right)
+    &=-\mu\frac{\partial \bm{\mathcal{H}}_{sx}}{\partial t}
+    -\frac{\sigma_x\mu}{\varepsilon} \bm{\mathcal{H}}_{sx}\\
+    \label{eq:time_domain_H_sy}
+    \frac{\partial}{\partial y}
+    \left(
+        \bm{\hat{e}_y} \times\bm{\mathcal{E}}
+    \right)
+    &=-\mu\frac{\partial \bm{\mathcal{H}}_{sy}}{\partial t}
+    -\frac{\sigma_y\mu}{\varepsilon} \bm{\mathcal{H}}_{sy}\\
+    \label{eq:time_domain_H_sz}
+    \frac{\partial}{\partial z}
+    \left(
+        \bm{\hat{e}_z} \times\bm{\mathcal{E}}
+    \right)
+    &=-\mu\frac{\partial \bm{\mathcal{H}}_{sz}}{\partial t}
+    -\frac{\sigma_z\mu}{\varepsilon} \bm{\mathcal{H}}_{sz}
+\end{align}
+\par 类似的，我们把电场分裂为三个矢量分量：
+\begin{equation}
+    \bm{E}=\bm{E}_{sx}+\bm{E}_{sy}+\bm{E}_{sz}
+\end{equation}
+\par 同样可以得到相应的时域方程为
+\begin{align}
+    \label{eq:time_domain_E_sx}
+    \frac{\partial}{\partial x}
+    \left(
+        \bm{\hat{e}_x} \times\bm{\mathcal{H}}
+    \right)
+    &=\varepsilon\frac{\partial \bm{\mathcal{E}}_{sx}}{\partial t}
+    +\sigma_x \bm{\mathcal{E}}_{sx}\\
+    \label{eq:time_domain_E_sy}
+    \frac{\partial}{\partial y}
+    \left(
+        \bm{\hat{e}_y} \times\bm{\mathcal{H}}
+    \right)
+    &=\varepsilon\frac{\partial \bm{\mathcal{E}}_{sy}}{\partial t}
+    +\sigma_y \bm{\mathcal{E}}_{sy}\\
+    \label{eq:time_domain_E_sz}
+    \frac{\partial}{\partial z}
+    \left(
+        \bm{\hat{e}_z} \times\bm{\mathcal{H}}
+    \right)
+    &=\varepsilon\frac{\partial \bm{\mathcal{E}}_{sz}}{\partial t}
+    +\sigma_z \bm{\mathcal{E}}_{sz}
+\end{align}
+\par 这些修正的时域Maxwell方程组可以使用Yee 网格进行离散。
+现在考虑一个二维 $\text{TM}_z$ 问题，其中 
+$\bm{\mathcal{E}}=\bm{\hat{e}_z}\mathcal{E}_z$，
+$\bm{\mathcal{H}}=\bm{\hat{e}_x}\mathcal{H}_x + \bm{\hat{e}_y}\mathcal{H}_y$。
+从式 \eqref{eq:time_domain_H_sx} 至
+\eqref{eq:time_domain_E_sz} 中可得
+$\bm{\mathcal{H}}_{sx}=\bm{\hat{e}_y}\mathcal{H}_y$，
+$\bm{\mathcal{H}}_{sy}=\bm{\hat{e}_x}\mathcal{H}_x$ 和
+$\bm{\mathcal{H}}_{sz}=0$，并且有
+\begin{align}
+    \frac{\partial \mathcal{E}_z}{\partial x}
+    &=\mu\frac{\partial \mathcal{H}_{y}}{\partial t}
+    +\frac{\sigma_x\mu}{\varepsilon} \mathcal{H}_{y}\\
+    \frac{\partial \mathcal{E}_z}{\partial y}
+    &=-\mu\frac{\partial \mathcal{H}_{x}}{\partial t}
+    -\frac{\sigma_y\mu}{\varepsilon} \mathcal{H}_{x}
+\end{align}
+\par 同理可得 $\bm{\mathcal{E}}_{sx}=\bm{\hat{e}_z}\mathcal{E}_{sx,z}$，
+$\bm{\mathcal{E}}_{sy}=\bm{\hat{e}_z}\mathcal{E}_{sy,z}$ 和
+$\bm{\mathcal{E}}_{sz}=0$，其中 $\mathcal{E}_{z} = \mathcal{E}_{sx,z} + \mathcal{E}_{sy,z}$ 
+并且有
+\begin{align}
+    \frac{\partial \mathcal{H}_y}{\partial x}
+    &=\varepsilon\frac{\partial \mathcal{E}_{sx,z}}{\partial t}
+    +\sigma_x \mathcal{E}_{sx,z}\\
+    \frac{\partial \mathcal{H}_x}{\partial y}
+    &=-\varepsilon\frac{\partial \mathcal{E}_{sy,z}}{\partial t}
+    -\sigma_y \mathcal{E}_{sy,z}
+\end{align}
+\par 可以用 Yee 网格对上述方程进行离散化，从而得到
+完美匹配层的时域有限差分更新公式。
+
+\subsubsection{辅助微分方程法}
+
+\par 除了分裂场矢量，另一种实现完美匹配层的方法是使用辅助矢量并求解对应的辅助微
+分方程。完美匹配层等效于一种各向异性的色散媒质，其介电常数和磁导率张量分别为：
+\begin{equation}
+    \bm{\overline{\varepsilon}}=\varepsilon
+    \begin{bmatrix}
+        \dfrac{s_y s_z}{s_x} & 0 & 0\\
+        0 & \dfrac{s_z s_x}{s_y} & 0\\
+        0 & 0 & \dfrac{s_x s_y}{s_z}
+    \end{bmatrix}
+    \qquad
+    \bm{\overline{\mu}}=\mu
+    \begin{bmatrix}
+        \dfrac{s_y s_z}{s_x} & 0 & 0\\
+        0 & \dfrac{s_z s_x}{s_y} & 0\\
+        0 & 0 & \dfrac{s_x s_y}{s_z}
+    \end{bmatrix}
+\end{equation}
+\par 其中$\varepsilon$和$\mu$分别表示被
+完美匹配层包围媒质的介电常数和磁导率，
+而$s_x$、$s_y$，及$s_z$由
+式 \eqref{eq:definition_of_sx_sy_sz} 给出。
+在这样的媒质中，Maxwell方程组的前两个方程为：
+\begin{gather}
+    \label{eq:ADI_curl_E}
+    \nabla\times\bm{E}=-i\omega
+    \begin{bmatrix}
+        s_y & 0 & 0\\
+        0 & s_z & 0\\
+        0 & 0 & s_x
+    \end{bmatrix} \cdot \bm{B}\\
+    \label{eq:ADI_curl_H}
+    \nabla\times\bm{H}=i\omega
+    \begin{bmatrix}
+        s_y & 0 & 0\\
+        0 & s_z & 0\\
+        0 & 0 & s_x
+    \end{bmatrix} \cdot \bm{D}
+\end{gather}
+\par 其中 $\bm{D}$ 和 $\bm{B}$ 分别为辅助矢量：
+\begin{gather}
+    \label{eq:definition_of_D}
+    \bm{D} = \varepsilon
+    \begin{bmatrix}
+        \dfrac{s_z}{s_x} & 0 & 0\\
+        0 & \dfrac{s_x}{s_y} & 0\\
+        0 & 0 & \dfrac{s_y}{s_z}
+    \end{bmatrix} \cdot \bm{E}\\
+    \label{eq:definition_of_B}
+    \bm{B} = \mu
+    \begin{bmatrix}
+        \dfrac{s_z}{s_x} & 0 & 0\\
+        0 & \dfrac{s_x}{s_y} & 0\\
+        0 & 0 & \dfrac{s_y}{s_z}
+    \end{bmatrix} \cdot \bm{H}
+\end{gather}
+\par 以 $x$ 分量为例，式 \eqref{eq:ADI_curl_E} 和 \eqref{eq:ADI_curl_H}
+以及式 \eqref{eq:definition_of_B} 和 \eqref{eq:definition_of_D}
+可写为：
+\begin{gather}
+    \frac{\partial E_z}{\partial y}
+    -\frac{\partial E_y}{\partial z}
+    =-i\omega s_y B_x\\
+    \frac{\partial H_z}{\partial y}
+    -\frac{\partial H_y}{\partial z}
+    =i\omega s_y D_x\\
+    s_x D_x = \varepsilon s_z E_x\\
+    s_x B_x = \mu s_z H_x
+\end{gather}
+\par 将 $s_x$，$s_y$ 和 $s_z$ 代入上述方程，并进行时域变换，可以得到：
+\begin{gather}
+    \frac{\partial \mathcal{E}_z}{\partial y}
+    -\frac{\partial \mathcal{E}_y}{\partial z}
+    =-\frac{\partial \mathcal{B}_x}{\partial t}
+    -\frac{\sigma_y}{\varepsilon} \mathcal{B}_x\\
+    \frac{\partial \mathcal{H}_z}{\partial y}
+    -\frac{\partial \mathcal{H}_y}{\partial z}
+    =\frac{\partial \mathcal{D}_x}{\partial t}
+    +\frac{\sigma_y}{\varepsilon} \mathcal{D}_x\\
+    \frac{\partial \mathcal{D}_x}{\partial t}
+    +\frac{\sigma_x}{\varepsilon} \mathcal{D}_x
+    =\varepsilon\frac{\partial \mathcal{E}_x}{\partial t}
+    +\sigma_z \mathcal{E}_x\\
+    \frac{\partial \mathcal{B}_x}{\partial t}
+    +\frac{\sigma_x}{\varepsilon} \mathcal{B}_x
+    =\mu\frac{\partial \mathcal{H}_x}{\partial t}
+    +\frac{\sigma_z\mu}{\varepsilon} \mathcal{H}_x
+\end{gather}
+
+% ===============================================
+
+\newpage
+\printbibliography
+
+\end{document}
